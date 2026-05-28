@@ -2,6 +2,7 @@ package com.example.roombooking.presentation.calendar
 
 import android.os.Bundle
 import android.view.*
+import android.widget.TextView
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -12,7 +13,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.roombooking.R
 import com.example.roombooking.databinding.FragmentCalendarBinding
-import com.example.roombooking.databinding.ItemCalendarDayBinding
 import com.example.roombooking.domain.model.Event
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.DayPosition
@@ -60,7 +60,7 @@ class CalendarFragment : Fragment() {
             override fun onMenuItemSelected(item: MenuItem): Boolean {
                 return when (item.itemId) {
                     R.id.action_filter -> {
-                        findNavController().navigate(R.id.action_calendar_to_filterEvents)
+                        findNavController().navigate(R.id.filterFragment)
                         true
                     }
                     else -> false
@@ -78,6 +78,7 @@ class CalendarFragment : Fragment() {
             override fun create(view: View) = DayViewContainer(view) { day ->
                 if (day.position == DayPosition.MonthDate) viewModel.selectDate(day.date)
             }
+
             override fun bind(container: DayViewContainer, data: CalendarDay) {
                 container.bind(
                     day = data,
@@ -95,7 +96,7 @@ class CalendarFragment : Fragment() {
             binding.tvMonthTitle.text = title
         }
 
-        binding.calendarView.setup(startMonth, endMonth, firstDayOfWeekFromLocale(Locale("ru")))
+        binding.calendarView.setup(startMonth, endMonth, firstDayOfWeekFromLocale())
         binding.calendarView.scrollToMonth(currentMonth)
     }
 
@@ -117,7 +118,7 @@ class CalendarFragment : Fragment() {
         binding.btnPrevMonth.setOnClickListener { viewModel.navigateToPreviousMonth() }
         binding.btnNextMonth.setOnClickListener { viewModel.navigateToNextMonth() }
         binding.fabAddEvent.setOnClickListener {
-            findNavController().navigate(R.id.action_calendar_to_addEvent)
+            findNavController().navigate(R.id.addEditEventFragment)
         }
     }
 
@@ -140,8 +141,8 @@ class CalendarFragment : Fragment() {
     }
 
     private fun openEventDetail(event: Event) {
-        val action = CalendarFragmentDirections.actionCalendarToEventDetail(event.id)
-        findNavController().navigate(action)
+        val bundle = android.os.Bundle().apply { putLong("eventId", event.id) }
+        findNavController().navigate(R.id.eventDetailFragment, bundle)
     }
 
     override fun onDestroyView() {
@@ -155,7 +156,9 @@ class DayViewContainer(
     private val onClick: (CalendarDay) -> Unit
 ) : ViewContainer(view) {
 
-    private val binding = ItemCalendarDayBinding.bind(view)
+    // Используем findViewById напрямую — без ViewBinding для избежания NPE
+    private val tvDay: TextView = view.findViewById(R.id.tv_day)
+    private val viewDot: View = view.findViewById(R.id.view_dot)
     lateinit var day: CalendarDay
 
     init {
@@ -164,34 +167,29 @@ class DayViewContainer(
 
     fun bind(day: CalendarDay, isSelected: Boolean, isToday: Boolean, hasEvents: Boolean) {
         this.day = day
-        binding.tvDay.text = day.date.dayOfMonth.toString()
+        tvDay.text = day.date.dayOfMonth.toString()
 
+        // Цвет текста в зависимости от позиции
+        val textAlpha = if (day.position == DayPosition.MonthDate) 1f else 0.3f
+        tvDay.alpha = textAlpha
+
+        // Фон дня
         when {
             isToday -> {
-                binding.tvDay.setBackgroundResource(R.drawable.bg_day_today)
-                binding.tvDay.setTextColor(
-                    binding.tvDay.context.getColor(android.R.color.white)
-                )
+                tvDay.setBackgroundResource(R.drawable.bg_day_today)
+                tvDay.setTextColor(android.graphics.Color.WHITE)
             }
             isSelected -> {
-                binding.tvDay.setBackgroundResource(R.drawable.bg_day_selected)
-                binding.tvDay.setTextColor(
-                    binding.tvDay.context.getColor(R.color.md_blue_700)
-                )
+                tvDay.setBackgroundResource(R.drawable.bg_day_selected)
+                tvDay.setTextColor(tvDay.context.getColor(R.color.md_blue_700))
             }
             else -> {
-                binding.tvDay.background = null
-                val color = if (day.position == DayPosition.MonthDate)
-                    com.google.android.material.R.attr.colorOnSurface
-                else
-                    com.google.android.material.R.attr.colorOutline
-                binding.tvDay.setTextColor(
-                    com.google.android.material.color.MaterialColors.getColor(
-                        binding.tvDay, color
-                    )
-                )
+                tvDay.background = null
+                tvDay.setTextColor(tvDay.context.getColor(android.R.color.darker_gray))
             }
         }
-        binding.viewDot.visibility = if (hasEvents) View.VISIBLE else View.GONE
+
+        viewDot.visibility = if (hasEvents && day.position == DayPosition.MonthDate)
+            View.VISIBLE else View.GONE
     }
 }

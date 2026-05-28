@@ -4,7 +4,7 @@ package com.example.roombooking.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,7 +17,7 @@ import java.lang.String;
 
 public final class ItemCalendarDayBinding implements ViewBinding {
   @NonNull
-  private final LinearLayout rootView;
+  private final FrameLayout rootView;
 
   @NonNull
   public final TextView tvDay;
@@ -25,7 +25,7 @@ public final class ItemCalendarDayBinding implements ViewBinding {
   @NonNull
   public final View viewDot;
 
-  private ItemCalendarDayBinding(@NonNull LinearLayout rootView, @NonNull TextView tvDay,
+  private ItemCalendarDayBinding(@NonNull FrameLayout rootView, @NonNull TextView tvDay,
       @NonNull View viewDot) {
     this.rootView = rootView;
     this.tvDay = tvDay;
@@ -34,7 +34,7 @@ public final class ItemCalendarDayBinding implements ViewBinding {
 
   @Override
   @NonNull
-  public LinearLayout getRoot() {
+  public FrameLayout getRoot() {
     return rootView;
   }
 
@@ -71,7 +71,7 @@ public final class ItemCalendarDayBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ItemCalendarDayBinding((LinearLayout) rootView, tvDay, viewDot);
+      return new ItemCalendarDayBinding((FrameLayout) rootView, tvDay, viewDot);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

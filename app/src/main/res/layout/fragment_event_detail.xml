@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent" android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/ThemeOverlay.Material3.Dark.ActionBar"
+        android:title="Мероприятие"
+        app:navigationIcon="@drawable/ic_arrow_back" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="16dp">
+
+            <TextView android:id="@+id/tv_title" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textSize="22sp" android:textStyle="bold" />
+            <TextView android:id="@+id/tv_room" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textSize="14sp"
+                android:textColor="?attr/colorOnSurfaceVariant" android:layout_marginTop="6dp" />
+            <TextView android:id="@+id/tv_date" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textSize="14sp" android:layout_marginTop="4dp" />
+            <TextView android:id="@+id/tv_time" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textSize="14sp" android:layout_marginTop="4dp" />
+            <TextView android:id="@+id/tv_description" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textSize="14sp" android:layout_marginTop="8dp" />
+            <TextView android:id="@+id/tv_participants" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textSize="14sp" android:layout_marginTop="4dp" />
+            <TextView android:id="@+id/tv_sync_status" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textSize="12sp"
+                android:textColor="?attr/colorOnSurfaceVariant" android:layout_marginTop="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_edit" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="20dp"
+                android:text="Редактировать" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_delete" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="8dp"
+                android:backgroundTint="@color/color_error" android:text="Удалить" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

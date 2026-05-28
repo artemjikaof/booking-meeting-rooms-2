@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.example.roombooking.data.repository.SyncConflictData
 import com.example.roombooking.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -33,7 +34,9 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -55,8 +58,12 @@ class SettingsFragment : Fragment() {
         }
 
         binding.btnSelectCalendar.setOnClickListener {
-            if (viewModel.hasCalendarPermission) { viewModel.loadCalendars(); showCalendarChooser() }
-            else showPermissionRationale()
+            if (viewModel.hasCalendarPermission) {
+                viewModel.loadCalendars()
+                showCalendarChooser()
+            } else {
+                showPermissionRationale()
+            }
         }
 
         binding.btnSyncNow.setOnClickListener { viewModel.syncNow() }
@@ -71,7 +78,8 @@ class SettingsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.syncEnabled.collect { enabled ->
                 binding.switchSync.isChecked = enabled
-                binding.groupSyncSettings.visibility = if (enabled) View.VISIBLE else View.GONE
+                binding.groupSyncSettings.visibility =
+                    if (enabled) View.VISIBLE else View.GONE
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
@@ -99,13 +107,16 @@ class SettingsFragment : Fragment() {
     private fun showPermissionRationale() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Доступ к календарю")
-            .setMessage("Приложению нужен доступ к вашему календарю для синхронизации мероприятий. " +
-                    "Это позволит автоматически добавлять бронирования в системный календарь.")
+            .setMessage(
+                "Приложению нужен доступ к вашему календарю для синхронизации мероприятий."
+            )
             .setPositiveButton("Разрешить") { _, _ ->
-                calendarPermissionLauncher.launch(arrayOf(
-                    Manifest.permission.READ_CALENDAR,
-                    Manifest.permission.WRITE_CALENDAR
-                ))
+                calendarPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.READ_CALENDAR,
+                        Manifest.permission.WRITE_CALENDAR
+                    )
+                )
             }
             .setNegativeButton("Не сейчас", null)
             .show()
@@ -113,7 +124,10 @@ class SettingsFragment : Fragment() {
 
     private fun showCalendarChooser() {
         val calendars = viewModel.availableCalendars.value
-        if (calendars.isEmpty()) { Toast.makeText(requireContext(), "Нет доступных календарей", Toast.LENGTH_SHORT).show(); return }
+        if (calendars.isEmpty()) {
+            Toast.makeText(requireContext(), "Нет доступных календарей", Toast.LENGTH_SHORT).show()
+            return
+        }
         val items = calendars.map { "${it.displayName} (${it.accountName})" }.toTypedArray()
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Выберите календарь")
@@ -121,17 +135,19 @@ class SettingsFragment : Fragment() {
             .show()
     }
 
-    private fun showConflictDialog(conflict: com.example.roombooking.data.repository.SyncConflictData) {
+    private fun showConflictDialog(conflict: SyncConflictData) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Конфликт синхронизации")
-            .setMessage("Мероприятие «${conflict.appVersion.title}» было изменено одновременно в приложении и в системном календаре.")
-            .setPositiveButton("Сохранить из приложения") { _, _ ->
-                viewModel.resolveConflict(conflict, useAppVersion = true)
+            .setMessage(
+                "«${conflict.appVersion.title}» изменено и в приложении, и в системном календаре. Какую версию сохранить?"
+            )
+            .setPositiveButton("Из приложения") { _, _ ->
+                viewModel.resolveConflict(conflict)
             }
-            .setNeutralButton("Из системного календаря") { _, _ ->
-                viewModel.resolveConflict(conflict, useAppVersion = false)
+            .setNeutralButton("Из календаря") { _, _ ->
+                viewModel.resolveConflict(conflict)
             }
-            .setNegativeButton("Объединить", null)
+            .setNegativeButton("Позже", null)
             .show()
     }
 

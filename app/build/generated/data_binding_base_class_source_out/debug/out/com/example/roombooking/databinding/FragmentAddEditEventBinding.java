@@ -4,7 +4,7 @@ package com.example.roombooking.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AutoCompleteTextView;
+import android.widget.Spinner;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
@@ -51,7 +51,7 @@ public final class FragmentAddEditEventBinding implements ViewBinding {
   public final TextInputEditText etTitle;
 
   @NonNull
-  public final AutoCompleteTextView spinnerRoom;
+  public final Spinner spinnerRoom;
 
   @NonNull
   public final SwitchMaterial switchSyncCalendar;
@@ -64,7 +64,7 @@ public final class FragmentAddEditEventBinding implements ViewBinding {
       @NonNull MaterialButton btnDateStart, @NonNull MaterialButton btnSave,
       @NonNull MaterialButton btnTimeEnd, @NonNull MaterialButton btnTimeStart,
       @NonNull TextInputEditText etDescription, @NonNull TextInputEditText etParticipants,
-      @NonNull TextInputEditText etTitle, @NonNull AutoCompleteTextView spinnerRoom,
+      @NonNull TextInputEditText etTitle, @NonNull Spinner spinnerRoom,
       @NonNull SwitchMaterial switchSyncCalendar, @NonNull MaterialToolbar toolbar) {
     this.rootView = rootView;
     this.btnCancel = btnCancel;
@@ -163,7 +163,7 @@ public final class FragmentAddEditEventBinding implements ViewBinding {
       }
 
       id = R.id.spinner_room;
-      AutoCompleteTextView spinnerRoom = ViewBindings.findChildViewById(rootView, id);
+      Spinner spinnerRoom = ViewBindings.findChildViewById(rootView, id);
       if (spinnerRoom == null) {
         break missingId;
       }

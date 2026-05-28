@@ -4,7 +4,7 @@
             "outputFile": "com.example.roombooking.app-mergeDebugResources-58:/values-v26/values-v26.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\artem\\.gradle\\caches\\transforms-3\\cf8123056fdc899b29e169c8bd2046b7\\transformed\\appcompat-1.6.1\\res\\values-v26\\values-v26.xml",
+                    "source": "C:\\Users\\elena\\.gradle\\caches\\transforms-3\\cf8123056fdc899b29e169c8bd2046b7\\transformed\\appcompat-1.6.1\\res\\values-v26\\values-v26.xml",
                     "from": {
                         "startLines": "2,3,4,8,12,16",
                         "startColumns": "4,4,4,4,4,4",
