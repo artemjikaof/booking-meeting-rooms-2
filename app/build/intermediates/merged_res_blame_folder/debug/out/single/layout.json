@@ -1,0 +1,26 @@
+[
+    {
+        "merged": "C:\\Users\\artem\\.gradle\\daemon\\8.5\\com.example.roombooking.app-mergeDebugResources-59:\\layout\\activity_main.xml",
+        "source": "C:\\Users\\artem\\.gradle\\daemon\\8.5\\com.example.roombooking.app-main-62:\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "com.example.roombooking.app-mergeDebugResources-59:/layout/fragment_calendar.xml",
+        "source": "com.example.roombooking.app-main-62:/layout/fragment_calendar.xml"
+    },
+    {
+        "merged": "com.example.roombooking.app-mergeDebugResources-59:/layout/item_calendar_month_header.xml",
+        "source": "com.example.roombooking.app-main-62:/layout/item_calendar_month_header.xml"
+    },
+    {
+        "merged": "com.example.roombooking.app-mergeDebugResources-59:/layout/item_calendar_day.xml",
+        "source": "com.example.roombooking.app-main-62:/layout/item_calendar_day.xml"
+    },
+    {
+        "merged": "C:\\Users\\artem\\.gradle\\daemon\\8.5\\com.example.roombooking.app-mergeDebugResources-59:\\layout\\fragment_add_edit_event.xml",
+        "source": "C:\\Users\\artem\\.gradle\\daemon\\8.5\\com.example.roombooking.app-main-62:\\layout\\fragment_add_edit_event.xml"
+    },
+    {
+        "merged": "C:\\Users\\artem\\.gradle\\daemon\\8.5\\com.example.roombooking.app-mergeDebugResources-59:\\layout\\item_event.xml",
+        "source": "C:\\Users\\artem\\.gradle\\daemon\\8.5\\com.example.roombooking.app-main-62:\\layout\\item_event.xml"
+    }
+]

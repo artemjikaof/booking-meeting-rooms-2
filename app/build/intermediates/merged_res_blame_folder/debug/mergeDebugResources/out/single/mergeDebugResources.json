@@ -1,0 +1,22 @@
+[
+    {
+        "merged": "com.example.roombooking.app-debug-60:/layout_item_event.xml.flat",
+        "source": "com.example.roombooking.app-main-62:/layout/item_event.xml"
+    },
+    {
+        "merged": "com.example.roombooking.app-debug-60:/layout_fragment_add_edit_event.xml.flat",
+        "source": "com.example.roombooking.app-main-62:/layout/fragment_add_edit_event.xml"
+    },
+    {
+        "merged": "com.example.roombooking.app-debug-60:/xml_file_paths.xml.flat",
+        "source": "com.example.roombooking.app-main-62:/xml/file_paths.xml"
+    },
+    {
+        "merged": "com.example.roombooking.app-debug-60:/layout_activity_main.xml.flat",
+        "source": "com.example.roombooking.app-main-62:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.example.roombooking.app-debug-60:/menu_bottom_nav_menu.xml.flat",
+        "source": "com.example.roombooking.app-main-62:/menu/bottom_nav_menu.xml"
+    }
+]

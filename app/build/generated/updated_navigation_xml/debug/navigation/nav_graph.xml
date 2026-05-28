@@ -1,0 +1,130 @@
+<navigation
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:id="@+id/nav_graph"
+app:startDestination="@id/calendarFragment" >
+
+<!-- Календарь -->
+<fragment
+    android:id="@+id/calendarFragment"
+    android:name="com.example.roombooking.presentation.calendar.CalendarFragment"
+    android:label="Календарь"
+    tools:layout="@layout/fragment_calendar" >
+
+    <action
+        android:id="@+id/action_calendar_to_addEvent"
+        app:destination="@id/addEditEventFragment" />
+    <action
+        android:id="@+id/action_calendar_to_eventDetail"
+        app:destination="@id/eventDetailFragment" />
+    <action
+        android:id="@+id/action_calendar_to_filterEvents"
+        app:destination="@id/filterFragment" />
+
+</fragment>
+
+<!-- Помещения -->
+<fragment
+    android:id="@+id/roomsFragment"
+    android:name="com.example.roombooking.presentation.rooms.RoomsFragment"
+    android:label="Помещения"
+    tools:layout="@layout/fragment_rooms" >
+
+    <action
+        android:id="@+id/action_rooms_to_addRoom"
+        app:destination="@id/addEditRoomFragment" />
+    <action
+        android:id="@+id/action_rooms_to_roomDetail"
+        app:destination="@id/roomDetailFragment" />
+
+</fragment>
+
+<!-- Мероприятия (список) -->
+<fragment
+    android:id="@+id/eventsListFragment"
+    android:name="com.example.roombooking.presentation.events.EventsListFragment"
+    android:label="Мероприятия"
+    tools:layout="@layout/fragment_events_list" >
+
+    <action
+        android:id="@+id/action_eventsList_to_eventDetail"
+        app:destination="@id/eventDetailFragment" />
+    <action
+        android:id="@+id/action_eventsList_to_addEvent"
+        app:destination="@id/addEditEventFragment" />
+
+</fragment>
+
+<!-- Настройки -->
+<fragment
+    android:id="@+id/settingsFragment"
+    android:name="com.example.roombooking.presentation.settings.SettingsFragment"
+    android:label="Настройки"
+    tools:layout="@layout/fragment_settings" />
+
+<!-- Детали мероприятия -->
+<fragment
+    android:id="@+id/eventDetailFragment"
+    android:name="com.example.roombooking.presentation.events.EventDetailFragment"
+    android:label="Мероприятие"
+    tools:layout="@layout/fragment_event_detail" >
+
+    <argument
+        android:name="eventId"
+        app:argType="long" />
+
+    <action
+        android:id="@+id/action_eventDetail_to_editEvent"
+        app:destination="@id/addEditEventFragment" />
+
+</fragment>
+
+<!-- Добавление/редактирование мероприятия -->
+<fragment
+    android:id="@+id/addEditEventFragment"
+    android:name="com.example.roombooking.presentation.events.AddEditEventFragment"
+    android:label="Мероприятие"
+    tools:layout="@layout/fragment_add_edit_event" >
+
+    <argument
+        android:name="eventId"
+        android:defaultValue="-1L"
+        app:argType="long" />
+
+</fragment>
+
+<!-- Детали помещения -->
+<fragment
+    android:id="@+id/roomDetailFragment"
+    android:name="com.example.roombooking.presentation.rooms.RoomDetailFragment"
+    android:label="Помещение"
+    tools:layout="@layout/fragment_room_detail" >
+
+    <argument
+        android:name="roomId"
+        app:argType="long" />
+
+</fragment>
+
+<!-- Добавление/редактирование помещения -->
+<fragment
+    android:id="@+id/addEditRoomFragment"
+    android:name="com.example.roombooking.presentation.rooms.AddEditRoomFragment"
+    android:label="Помещение"
+    tools:layout="@layout/fragment_add_edit_room" >
+
+    <argument
+        android:name="roomId"
+        android:defaultValue="-1L"
+        app:argType="long" />
+
+</fragment>
+
+<!-- Фильтр -->
+<fragment
+    android:id="@+id/filterFragment"
+    android:name="com.example.roombooking.presentation.events.FilterFragment"
+    android:label="Фильтр"
+    tools:layout="@layout/fragment_filter" />
+</navigation>

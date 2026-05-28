@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Бронирование помещений</string>
+    <string name="nav_calendar">Календарь</string>
+    <string name="nav_rooms">Помещения</string>
+    <string name="nav_events">Мероприятия</string>
+    <string name="nav_settings">Настройки</string>
+    <string name="add_event">Добавить мероприятие</string>
+    <string name="add_room">Добавить помещение</string>
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отмена</string>
+    <string name="delete">Удалить</string>
+    <string name="edit">Редактировать</string>
+    <string name="title_required">Название *</string>
+    <string name="room_required">Помещение *</string>
+    <string name="date_start">Дата начала *</string>
+    <string name="date_end">Дата окончания *</string>
+    <string name="time_start">Время начала *</string>
+    <string name="time_end">Время окончания *</string>
+    <string name="description_optional">Описание</string>
+    <string name="participants_optional">Участники</string>
+    <string name="sync_to_calendar">Добавить в календарь устройства</string>
+    <string name="from_calendar_badge">Из системного календаря</string>
+    <string name="capacity">Вместимость (чел.) *</string>
+    <string name="no_events">Нет мероприятий</string>
+    <string name="sync_now">Синхронизировать сейчас</string>
+    <string name="sync_enabled">Синхронизация</string>
+    <string name="filter_tags_hint">#Бронирование,#Помещение</string>
+    <string name="booking_conflict_title">Помещение занято</string>
+    <string name="sync_conflict_title">Конфликт синхронизации</string>
+    <string name="use_app_version">Сохранить из приложения</string>
+    <string name="use_calendar_version">Из системного календаря</string>
+    <string name="merge_changes">Объединить изменения</string>
+    <string name="room_has_events">Помещение имеет привязанные мероприятия. Удалить всё равно?</string>
+</resources>

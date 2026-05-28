@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFF</color>
+    <color name="md_blue_700">#1565C0</color>
+    <color name="md_blue_100">#BBDEFB</color>
+    <color name="md_teal_700">#00796B</color>
+    <color name="surface">#FAFAFA</color>
+    <color name="nav_inactive">#9E9E9E</color>
+
+    <!-- Статусы мероприятий -->
+    <color name="event_upcoming">#1565C0</color>
+    <color name="event_today">#2E7D32</color>
+    <color name="event_past">#9E9E9E</color>
+
+    <!-- Бейджи -->
+    <color name="badge_upcoming_bg">#E3F2FD</color>
+    <color name="badge_today_bg">#E8F5E9</color>
+    <color name="badge_past_bg">#F5F5F5</color>
+
+    <!-- Семантические -->
+    <color name="color_error">#C62828</color>
+    <color name="color_success">#2E7D32</color>
+    <color name="color_warning">#E65100</color>
+</resources>

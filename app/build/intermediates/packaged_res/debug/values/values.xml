@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="badge_past_bg">#F5F5F5</color>
+    <color name="badge_today_bg">#E8F5E9</color>
+    <color name="badge_upcoming_bg">#E3F2FD</color>
+    <color name="color_error">#C62828</color>
+    <color name="color_success">#2E7D32</color>
+    <color name="color_warning">#E65100</color>
+    <color name="event_past">#9E9E9E</color>
+    <color name="event_today">#2E7D32</color>
+    <color name="event_upcoming">#1565C0</color>
+    <color name="md_blue_100">#BBDEFB</color>
+    <color name="md_blue_700">#1565C0</color>
+    <color name="md_teal_700">#00796B</color>
+    <color name="nav_inactive">#9E9E9E</color>
+    <color name="surface">#FAFAFA</color>
+    <color name="white">#FFFFFF</color>
+    <string name="add_event">Добавить мероприятие</string>
+    <string name="add_room">Добавить помещение</string>
+    <string name="app_name">Бронирование помещений</string>
+    <string name="booking_conflict_title">Помещение занято</string>
+    <string name="cancel">Отмена</string>
+    <string name="capacity">Вместимость (чел.) *</string>
+    <string name="date_end">Дата окончания *</string>
+    <string name="date_start">Дата начала *</string>
+    <string name="delete">Удалить</string>
+    <string name="description_optional">Описание</string>
+    <string name="edit">Редактировать</string>
+    <string name="filter_tags_hint">#Бронирование,#Помещение</string>
+    <string name="from_calendar_badge">Из системного календаря</string>
+    <string name="merge_changes">Объединить изменения</string>
+    <string name="nav_calendar">Календарь</string>
+    <string name="nav_events">Мероприятия</string>
+    <string name="nav_rooms">Помещения</string>
+    <string name="nav_settings">Настройки</string>
+    <string name="no_events">Нет мероприятий</string>
+    <string name="participants_optional">Участники</string>
+    <string name="room_has_events">Помещение имеет привязанные мероприятия. Удалить всё равно?</string>
+    <string name="room_required">Помещение *</string>
+    <string name="save">Сохранить</string>
+    <string name="sync_conflict_title">Конфликт синхронизации</string>
+    <string name="sync_enabled">Синхронизация</string>
+    <string name="sync_now">Синхронизировать сейчас</string>
+    <string name="sync_to_calendar">Добавить в календарь устройства</string>
+    <string name="time_end">Время окончания *</string>
+    <string name="time_start">Время начала *</string>
+    <string name="title_required">Название *</string>
+    <string name="use_app_version">Сохранить из приложения</string>
+    <string name="use_calendar_version">Из системного календаря</string>
+    <style name="Theme.RoomBooking" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/md_blue_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/md_blue_100</item>
+        <item name="colorSecondary">@color/md_teal_700</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="android:statusBarColor">@color/md_blue_700</item>
+    </style>
+</resources>
