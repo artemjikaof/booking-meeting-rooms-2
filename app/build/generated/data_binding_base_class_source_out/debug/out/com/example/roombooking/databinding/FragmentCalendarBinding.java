@@ -4,45 +4,41 @@ package com.example.roombooking.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.example.roombooking.R;
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.kizitonwose.calendar.view.CalendarView;
 import java.lang.NullPointerException;
 import java.lang.Override;
 import java.lang.String;
 
 public final class FragmentCalendarBinding implements ViewBinding {
   @NonNull
-  private final CoordinatorLayout rootView;
+  private final LinearLayout rootView;
 
   @NonNull
-  public final AppBarLayout appBarLayout;
+  public final ImageButton btnNextMonth;
 
   @NonNull
-  public final MaterialButton btnNextMonth;
-
-  @NonNull
-  public final MaterialButton btnPrevMonth;
-
-  @NonNull
-  public final CalendarView calendarView;
+  public final ImageButton btnPrevMonth;
 
   @NonNull
   public final LinearLayout emptyState;
 
   @NonNull
   public final FloatingActionButton fabAddEvent;
+
+  @NonNull
+  public final GridView gridCalendar;
 
   @NonNull
   public final RecyclerView rvEvents;
@@ -65,21 +61,22 @@ public final class FragmentCalendarBinding implements ViewBinding {
   @NonNull
   public final TextView tvMonthTitle;
 
-  private FragmentCalendarBinding(@NonNull CoordinatorLayout rootView,
-      @NonNull AppBarLayout appBarLayout, @NonNull MaterialButton btnNextMonth,
-      @NonNull MaterialButton btnPrevMonth, @NonNull CalendarView calendarView,
-      @NonNull LinearLayout emptyState, @NonNull FloatingActionButton fabAddEvent,
+  @NonNull
+  public final LinearLayout weekdaysRow;
+
+  private FragmentCalendarBinding(@NonNull LinearLayout rootView, @NonNull ImageButton btnNextMonth,
+      @NonNull ImageButton btnPrevMonth, @NonNull LinearLayout emptyState,
+      @NonNull FloatingActionButton fabAddEvent, @NonNull GridView gridCalendar,
       @NonNull RecyclerView rvEvents, @NonNull MaterialButton tabDay,
       @NonNull MaterialButton tabMonth, @NonNull MaterialButton tabWeek,
       @NonNull MaterialToolbar toolbar, @NonNull TextView tvEventsHeader,
-      @NonNull TextView tvMonthTitle) {
+      @NonNull TextView tvMonthTitle, @NonNull LinearLayout weekdaysRow) {
     this.rootView = rootView;
-    this.appBarLayout = appBarLayout;
     this.btnNextMonth = btnNextMonth;
     this.btnPrevMonth = btnPrevMonth;
-    this.calendarView = calendarView;
     this.emptyState = emptyState;
     this.fabAddEvent = fabAddEvent;
+    this.gridCalendar = gridCalendar;
     this.rvEvents = rvEvents;
     this.tabDay = tabDay;
     this.tabMonth = tabMonth;
@@ -87,11 +84,12 @@ public final class FragmentCalendarBinding implements ViewBinding {
     this.toolbar = toolbar;
     this.tvEventsHeader = tvEventsHeader;
     this.tvMonthTitle = tvMonthTitle;
+    this.weekdaysRow = weekdaysRow;
   }
 
   @Override
   @NonNull
-  public CoordinatorLayout getRoot() {
+  public LinearLayout getRoot() {
     return rootView;
   }
 
@@ -116,27 +114,15 @@ public final class FragmentCalendarBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
-      id = R.id.app_bar_layout;
-      AppBarLayout appBarLayout = ViewBindings.findChildViewById(rootView, id);
-      if (appBarLayout == null) {
-        break missingId;
-      }
-
       id = R.id.btn_next_month;
-      MaterialButton btnNextMonth = ViewBindings.findChildViewById(rootView, id);
+      ImageButton btnNextMonth = ViewBindings.findChildViewById(rootView, id);
       if (btnNextMonth == null) {
         break missingId;
       }
 
       id = R.id.btn_prev_month;
-      MaterialButton btnPrevMonth = ViewBindings.findChildViewById(rootView, id);
+      ImageButton btnPrevMonth = ViewBindings.findChildViewById(rootView, id);
       if (btnPrevMonth == null) {
-        break missingId;
-      }
-
-      id = R.id.calendar_view;
-      CalendarView calendarView = ViewBindings.findChildViewById(rootView, id);
-      if (calendarView == null) {
         break missingId;
       }
 
@@ -149,6 +135,12 @@ public final class FragmentCalendarBinding implements ViewBinding {
       id = R.id.fab_add_event;
       FloatingActionButton fabAddEvent = ViewBindings.findChildViewById(rootView, id);
       if (fabAddEvent == null) {
+        break missingId;
+      }
+
+      id = R.id.grid_calendar;
+      GridView gridCalendar = ViewBindings.findChildViewById(rootView, id);
+      if (gridCalendar == null) {
         break missingId;
       }
 
@@ -194,9 +186,15 @@ public final class FragmentCalendarBinding implements ViewBinding {
         break missingId;
       }
 
-      return new FragmentCalendarBinding((CoordinatorLayout) rootView, appBarLayout, btnNextMonth,
-          btnPrevMonth, calendarView, emptyState, fabAddEvent, rvEvents, tabDay, tabMonth, tabWeek,
-          toolbar, tvEventsHeader, tvMonthTitle);
+      id = R.id.weekdays_row;
+      LinearLayout weekdaysRow = ViewBindings.findChildViewById(rootView, id);
+      if (weekdaysRow == null) {
+        break missingId;
+      }
+
+      return new FragmentCalendarBinding((LinearLayout) rootView, btnNextMonth, btnPrevMonth,
+          emptyState, fabAddEvent, gridCalendar, rvEvents, tabDay, tabMonth, tabWeek, toolbar,
+          tvEventsHeader, tvMonthTitle, weekdaysRow);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

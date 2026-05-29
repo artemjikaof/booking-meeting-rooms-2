@@ -455,17 +455,6 @@ attr customNavigationLayout
 attr customPixelDimension
 attr customReference
 attr customStringValue
-attr cv_daySize
-attr cv_dayViewResource
-attr cv_monthFooterResource
-attr cv_monthHeaderResource
-attr cv_monthViewClass
-attr cv_orientation
-attr cv_outDateStyle
-attr cv_scrollPaged
-attr cv_weekFooterResource
-attr cv_weekHeaderResource
-attr cv_weekViewClass
 attr data
 attr dataPattern
 attr dayInvalidStyle
@@ -3257,7 +3246,6 @@ id animateToEnd
 id animateToStart
 id antiClockwise
 id anticipate
-id app_bar_layout
 id arc
 id asConfigured
 id async
@@ -3296,7 +3284,6 @@ id btn_time_start
 id buttonPanel
 id cache_measures
 id calendarFragment
-id calendar_view
 id callMeasure
 id cancel_button
 id carryVelocity
@@ -3375,8 +3362,6 @@ id elastic
 id embed
 id empty_state
 id end
-id endOfGrid
-id endOfRow
 id endToStart
 id enterAlways
 id enterAlwaysCollapsed
@@ -3410,7 +3395,6 @@ id flip
 id floating
 id forever
 id fragment_container_view_tag
-id freeForm
 id frost
 id fullscreen_header
 id ghost_view
@@ -3419,6 +3403,7 @@ id glide_custom_view_target_tag
 id gone
 id graph
 id graph_wrap
+id grid_calendar
 id group_divider
 id group_sync_settings
 id grouping
@@ -3429,7 +3414,6 @@ id hideable
 id home
 id homeAsUp
 id honorRequest
-id horizontal
 id horizontal_only
 id icon
 id icon_group
@@ -3443,7 +3427,6 @@ id indeterminate
 id info
 id invisible
 id inward
-id is_pooling_container_tag
 id italic
 id item_touch_helper_previous_elevation
 id jumpToEnd
@@ -3574,7 +3557,6 @@ id pathRelative
 id peekHeight
 id percent
 id pin
-id pooling_container_listener_holder_tag
 id position
 id postLayout
 id pressed
@@ -3582,7 +3564,6 @@ id progress_circular
 id progress_horizontal
 id radio
 id ratio
-id rectangle
 id rectangles
 id report_drawn
 id reverseSawtooth
@@ -3621,7 +3602,6 @@ id select_dialog_listview
 id selected
 id selection_type
 id settingsFragment
-id seventhWidth
 id sharedValueSet
 id sharedValueUnset
 id shortcut
@@ -3734,7 +3714,6 @@ id uniform
 id unlabeled
 id up
 id useLogo
-id vertical
 id vertical_only
 id view_dot
 id view_offset_helper
@@ -3745,6 +3724,7 @@ id view_tree_saved_state_registry_owner
 id view_tree_view_model_store_owner
 id visible
 id visible_removing_fragment_view_tag
+id weekdays_row
 id west
 id withText
 id with_icon
@@ -5312,7 +5292,6 @@ styleable BottomAppBar addElevationShadow backgroundTint elevation fabAlignmentM
 styleable BottomNavigationView android_minHeight compatShadowEnabled itemHorizontalTranslationEnabled shapeAppearance shapeAppearanceOverlay
 styleable BottomSheetBehavior_Layout android_maxWidth android_maxHeight android_elevation backgroundTint behavior_draggable behavior_expandedOffset behavior_fitToContents behavior_halfExpandedRatio behavior_hideable behavior_peekHeight behavior_saveFlags behavior_significantVelocityThreshold behavior_skipCollapsed gestureInsetBottomIgnored marginLeftSystemWindowInsets marginRightSystemWindowInsets marginTopSystemWindowInsets paddingBottomSystemWindowInsets paddingLeftSystemWindowInsets paddingRightSystemWindowInsets paddingTopSystemWindowInsets shapeAppearance shapeAppearanceOverlay shouldRemoveExpandedCorners
 styleable ButtonBarLayout allowStacking
-styleable CalendarView cv_daySize cv_dayViewResource cv_monthFooterResource cv_monthHeaderResource cv_monthViewClass cv_orientation cv_outDateStyle cv_scrollPaged
 styleable Capability queryPatterns shortcutMatchRequired
 styleable CardView android_minWidth android_minHeight cardBackgroundColor cardCornerRadius cardElevation cardMaxElevation cardPreventCornerOverlap cardUseCompatPadding contentPadding contentPaddingBottom contentPaddingLeft contentPaddingRight contentPaddingTop
 styleable Carousel carousel_alignment carousel_backwardTransition carousel_emptyViewsBehavior carousel_firstView carousel_forwardTransition carousel_infinite carousel_nextState carousel_previousState carousel_touchUpMode carousel_touchUp_dampeningFactor carousel_touchUp_velocityThreshold
@@ -5453,6 +5432,5 @@ styleable ViewBackgroundHelper android_background backgroundTint backgroundTintM
 styleable ViewPager2 android_orientation
 styleable ViewStubCompat android_id android_layout android_inflatedId
 styleable ViewTransition android_id SharedValue SharedValueId clearsTag duration ifTagNotSet ifTagSet motionInterpolator motionTarget onStateTransition pathMotionArc setsTag transitionDisable upDuration viewTransitionMode
-styleable WeekCalendarView cv_daySize cv_dayViewResource cv_scrollPaged cv_weekFooterResource cv_weekHeaderResource cv_weekViewClass
 styleable include constraintSet
 xml file_paths

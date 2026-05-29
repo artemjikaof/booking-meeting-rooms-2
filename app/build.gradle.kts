@@ -52,5 +52,4 @@ dependencies {
     implementation(libs.hilt.work)
     kapt(libs.hilt.compiler.work)
     implementation(libs.viewpager2)
-    implementation(libs.calendar.view)
 }

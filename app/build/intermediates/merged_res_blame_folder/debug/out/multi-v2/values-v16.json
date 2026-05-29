@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.roombooking.app-mergeDebugResources-58:/values-v16/values-v16.xml",
+            "outputFile": "com.example.roombooking.app-mergeDebugResources-55:/values-v16/values-v16.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\elena\\.gradle\\caches\\transforms-3\\07c4c9dcc4e5a8f1b4cebb478411ae84\\transformed\\core-1.12.0\\res\\values-v16\\values-v16.xml",
+                    "source": "C:\\Users\\elena\\.gradle\\caches\\transforms-3\\7a4a285e921dc283a27b31185f44fceb\\transformed\\core-1.12.0\\res\\values-v16\\values-v16.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
@@ -14,7 +14,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\elena\\.gradle\\caches\\transforms-3\\cf8123056fdc899b29e169c8bd2046b7\\transformed\\appcompat-1.6.1\\res\\values-v16\\values-v16.xml",
+                    "source": "C:\\Users\\elena\\.gradle\\caches\\transforms-3\\f1f61a07025a31398dabbcb10085a830\\transformed\\appcompat-1.6.1\\res\\values-v16\\values-v16.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

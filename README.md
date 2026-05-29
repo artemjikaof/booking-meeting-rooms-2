@@ -14,6 +14,7 @@
 
 ## Структура проекта
 
+
 ```
 app/src/main/java/com/example/roombooking/
 ├── RoomBookingApp.kt                       # Application + WorkManager config
@@ -48,7 +49,7 @@ app/src/main/java/com/example/roombooking/
     ├── CalendarSyncWorker.kt              # WorkManager: фоновая синхронизация (4-6ч)
     └── BootReceiver.kt                    # Восстановление WorkManager после перезагрузки
 ```
- 
+
 ## Реализованные требования ТЗ
 
 ### Функциональные требования
