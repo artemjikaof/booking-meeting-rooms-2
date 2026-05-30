@@ -1,17 +1,17 @@
-#Fri May 29 13:22:13 MSK 2026
-base.0=D\:\\RoomBooking\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
-base.1=D\:\\RoomBooking\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
-base.10=D\:\\RoomBooking\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\7\\classes.dex
-base.11=D\:\\RoomBooking\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\8\\classes.dex
-base.12=D\:\\RoomBooking\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes2.dex
-base.2=D\:\\RoomBooking\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\10\\classes.dex
-base.3=D\:\\RoomBooking\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\11\\classes.dex
-base.4=D\:\\RoomBooking\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\12\\classes.dex
-base.5=D\:\\RoomBooking\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\13\\classes.dex
-base.6=D\:\\RoomBooking\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\1\\classes.dex
-base.7=D\:\\RoomBooking\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\3\\classes.dex
-base.8=D\:\\RoomBooking\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\4\\classes.dex
-base.9=D\:\\RoomBooking\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\5\\classes.dex
+#Sat May 30 19:12:18 MSK 2026
+base.0=C\:\\Users\\Mechrevo\\StudioProjects\\booking-meeting-rooms-2\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
+base.1=C\:\\Users\\Mechrevo\\StudioProjects\\booking-meeting-rooms-2\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
+base.10=C\:\\Users\\Mechrevo\\StudioProjects\\booking-meeting-rooms-2\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\7\\classes.dex
+base.11=C\:\\Users\\Mechrevo\\StudioProjects\\booking-meeting-rooms-2\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\8\\classes.dex
+base.12=C\:\\Users\\Mechrevo\\StudioProjects\\booking-meeting-rooms-2\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes2.dex
+base.2=C\:\\Users\\Mechrevo\\StudioProjects\\booking-meeting-rooms-2\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\10\\classes.dex
+base.3=C\:\\Users\\Mechrevo\\StudioProjects\\booking-meeting-rooms-2\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\11\\classes.dex
+base.4=C\:\\Users\\Mechrevo\\StudioProjects\\booking-meeting-rooms-2\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\12\\classes.dex
+base.5=C\:\\Users\\Mechrevo\\StudioProjects\\booking-meeting-rooms-2\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\13\\classes.dex
+base.6=C\:\\Users\\Mechrevo\\StudioProjects\\booking-meeting-rooms-2\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\1\\classes.dex
+base.7=C\:\\Users\\Mechrevo\\StudioProjects\\booking-meeting-rooms-2\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\3\\classes.dex
+base.8=C\:\\Users\\Mechrevo\\StudioProjects\\booking-meeting-rooms-2\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\4\\classes.dex
+base.9=C\:\\Users\\Mechrevo\\StudioProjects\\booking-meeting-rooms-2\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\5\\classes.dex
 path.0=classes.dex
 path.1=0/classes.dex
 path.10=7/classes.dex

@@ -1,24 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="wrap_content">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent" android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:theme="@style/ThemeOverlay.Material3.Dark.ActionBar"
-        android:title="Мероприятие"
-        app:navigationIcon="@drawable/ic_arrow_back" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent" android:layout_height="0dp"
-        android:layout_weight="1">
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/ic_bottom_sheet_handle" />
 
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="vertical" android:padding="16dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Детали мероприятия"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"
+            android:textColor="?attr/colorOnSurface" />
 
             <TextView android:id="@+id/tv_title" android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:textSize="22sp" android:textStyle="bold" />
@@ -40,12 +46,16 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_edit" android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:layout_marginTop="20dp"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/md_blue_700"
                 android:text="Редактировать" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_delete" android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:layout_marginTop="8dp"
-                android:backgroundTint="@color/color_error" android:text="Удалить" />
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:textColor="@color/color_error"
+                app:strokeColor="@color/color_error"
+                android:text="Удалить" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-</LinearLayout>

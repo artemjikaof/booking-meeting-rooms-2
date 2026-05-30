@@ -4,14 +4,13 @@ package com.example.roombooking.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.example.roombooking.R;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -19,13 +18,13 @@ import java.lang.String;
 
 public final class FragmentRoomDetailBinding implements ViewBinding {
   @NonNull
-  private final LinearLayout rootView;
+  private final NestedScrollView rootView;
 
   @NonNull
   public final MaterialButton btnDelete;
 
   @NonNull
-  public final MaterialToolbar toolbar;
+  public final MaterialButton btnEdit;
 
   @NonNull
   public final TextView tvCapacity;
@@ -36,12 +35,12 @@ public final class FragmentRoomDetailBinding implements ViewBinding {
   @NonNull
   public final TextView tvName;
 
-  private FragmentRoomDetailBinding(@NonNull LinearLayout rootView,
-      @NonNull MaterialButton btnDelete, @NonNull MaterialToolbar toolbar,
+  private FragmentRoomDetailBinding(@NonNull NestedScrollView rootView,
+      @NonNull MaterialButton btnDelete, @NonNull MaterialButton btnEdit,
       @NonNull TextView tvCapacity, @NonNull TextView tvDescription, @NonNull TextView tvName) {
     this.rootView = rootView;
     this.btnDelete = btnDelete;
-    this.toolbar = toolbar;
+    this.btnEdit = btnEdit;
     this.tvCapacity = tvCapacity;
     this.tvDescription = tvDescription;
     this.tvName = tvName;
@@ -49,7 +48,7 @@ public final class FragmentRoomDetailBinding implements ViewBinding {
 
   @Override
   @NonNull
-  public LinearLayout getRoot() {
+  public NestedScrollView getRoot() {
     return rootView;
   }
 
@@ -80,9 +79,9 @@ public final class FragmentRoomDetailBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.toolbar;
-      MaterialToolbar toolbar = ViewBindings.findChildViewById(rootView, id);
-      if (toolbar == null) {
+      id = R.id.btn_edit;
+      MaterialButton btnEdit = ViewBindings.findChildViewById(rootView, id);
+      if (btnEdit == null) {
         break missingId;
       }
 
@@ -104,8 +103,8 @@ public final class FragmentRoomDetailBinding implements ViewBinding {
         break missingId;
       }
 
-      return new FragmentRoomDetailBinding((LinearLayout) rootView, btnDelete, toolbar, tvCapacity,
-          tvDescription, tvName);
+      return new FragmentRoomDetailBinding((NestedScrollView) rootView, btnDelete, btnEdit,
+          tvCapacity, tvDescription, tvName);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

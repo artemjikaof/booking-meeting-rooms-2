@@ -4,13 +4,12 @@ package com.example.roombooking.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.example.roombooking.R;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import java.lang.NullPointerException;
@@ -19,7 +18,7 @@ import java.lang.String;
 
 public final class FragmentAddEditRoomBinding implements ViewBinding {
   @NonNull
-  private final LinearLayout rootView;
+  private final NestedScrollView rootView;
 
   @NonNull
   public final MaterialButton btnCancel;
@@ -36,25 +35,21 @@ public final class FragmentAddEditRoomBinding implements ViewBinding {
   @NonNull
   public final TextInputEditText etName;
 
-  @NonNull
-  public final MaterialToolbar toolbar;
-
-  private FragmentAddEditRoomBinding(@NonNull LinearLayout rootView,
+  private FragmentAddEditRoomBinding(@NonNull NestedScrollView rootView,
       @NonNull MaterialButton btnCancel, @NonNull MaterialButton btnSave,
       @NonNull TextInputEditText etCapacity, @NonNull TextInputEditText etDescription,
-      @NonNull TextInputEditText etName, @NonNull MaterialToolbar toolbar) {
+      @NonNull TextInputEditText etName) {
     this.rootView = rootView;
     this.btnCancel = btnCancel;
     this.btnSave = btnSave;
     this.etCapacity = etCapacity;
     this.etDescription = etDescription;
     this.etName = etName;
-    this.toolbar = toolbar;
   }
 
   @Override
   @NonNull
-  public LinearLayout getRoot() {
+  public NestedScrollView getRoot() {
     return rootView;
   }
 
@@ -109,14 +104,8 @@ public final class FragmentAddEditRoomBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.toolbar;
-      MaterialToolbar toolbar = ViewBindings.findChildViewById(rootView, id);
-      if (toolbar == null) {
-        break missingId;
-      }
-
-      return new FragmentAddEditRoomBinding((LinearLayout) rootView, btnCancel, btnSave, etCapacity,
-          etDescription, etName, toolbar);
+      return new FragmentAddEditRoomBinding((NestedScrollView) rootView, btnCancel, btnSave,
+          etCapacity, etDescription, etName);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

@@ -11,7 +11,6 @@ import androidx.core.widget.NestedScrollView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.example.roombooking.R;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
@@ -56,16 +55,13 @@ public final class FragmentAddEditEventBinding implements ViewBinding {
   @NonNull
   public final SwitchMaterial switchSyncCalendar;
 
-  @NonNull
-  public final MaterialToolbar toolbar;
-
   private FragmentAddEditEventBinding(@NonNull NestedScrollView rootView,
       @NonNull MaterialButton btnCancel, @NonNull MaterialButton btnDateEnd,
       @NonNull MaterialButton btnDateStart, @NonNull MaterialButton btnSave,
       @NonNull MaterialButton btnTimeEnd, @NonNull MaterialButton btnTimeStart,
       @NonNull TextInputEditText etDescription, @NonNull TextInputEditText etParticipants,
       @NonNull TextInputEditText etTitle, @NonNull Spinner spinnerRoom,
-      @NonNull SwitchMaterial switchSyncCalendar, @NonNull MaterialToolbar toolbar) {
+      @NonNull SwitchMaterial switchSyncCalendar) {
     this.rootView = rootView;
     this.btnCancel = btnCancel;
     this.btnDateEnd = btnDateEnd;
@@ -78,7 +74,6 @@ public final class FragmentAddEditEventBinding implements ViewBinding {
     this.etTitle = etTitle;
     this.spinnerRoom = spinnerRoom;
     this.switchSyncCalendar = switchSyncCalendar;
-    this.toolbar = toolbar;
   }
 
   @Override
@@ -174,15 +169,9 @@ public final class FragmentAddEditEventBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.toolbar;
-      MaterialToolbar toolbar = ViewBindings.findChildViewById(rootView, id);
-      if (toolbar == null) {
-        break missingId;
-      }
-
       return new FragmentAddEditEventBinding((NestedScrollView) rootView, btnCancel, btnDateEnd,
           btnDateStart, btnSave, btnTimeEnd, btnTimeStart, etDescription, etParticipants, etTitle,
-          spinnerRoom, switchSyncCalendar, toolbar);
+          spinnerRoom, switchSyncCalendar);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

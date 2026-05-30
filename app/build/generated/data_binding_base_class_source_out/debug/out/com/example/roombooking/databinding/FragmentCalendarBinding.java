@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,6 +18,7 @@ import androidx.viewbinding.ViewBindings;
 import com.example.roombooking.R;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -26,10 +29,25 @@ public final class FragmentCalendarBinding implements ViewBinding {
   private final LinearLayout rootView;
 
   @NonNull
+  public final ImageButton btnNextDay;
+
+  @NonNull
   public final ImageButton btnNextMonth;
 
   @NonNull
+  public final ImageButton btnPrevDay;
+
+  @NonNull
   public final ImageButton btnPrevMonth;
+
+  @NonNull
+  public final MaterialButton btnTodayFloating;
+
+  @NonNull
+  public final LinearLayout containerHours;
+
+  @NonNull
+  public final LinearLayout containerMonthWeek;
 
   @NonNull
   public final LinearLayout emptyState;
@@ -41,7 +59,19 @@ public final class FragmentCalendarBinding implements ViewBinding {
   public final GridView gridCalendar;
 
   @NonNull
+  public final RelativeLayout layoutDaySchedule;
+
+  @NonNull
+  public final LinearLayout layoutDayTitleNav;
+
+  @NonNull
+  public final RelativeLayout layoutNavMonth;
+
+  @NonNull
   public final RecyclerView rvEvents;
+
+  @NonNull
+  public final ScrollView scrollViewHourly;
 
   @NonNull
   public final MaterialButton tabDay;
@@ -53,7 +83,16 @@ public final class FragmentCalendarBinding implements ViewBinding {
   public final MaterialButton tabWeek;
 
   @NonNull
+  public final MaterialButtonToggleGroup toggleGroupView;
+
+  @NonNull
   public final MaterialToolbar toolbar;
+
+  @NonNull
+  public final TextView tvCurrentTimeLabel;
+
+  @NonNull
+  public final TextView tvDayViewTitle;
 
   @NonNull
   public final TextView tvEventsHeader;
@@ -62,28 +101,55 @@ public final class FragmentCalendarBinding implements ViewBinding {
   public final TextView tvMonthTitle;
 
   @NonNull
+  public final LinearLayout viewCurrentTimeIndicator;
+
+  @NonNull
+  public final View viewRedLine;
+
+  @NonNull
   public final LinearLayout weekdaysRow;
 
-  private FragmentCalendarBinding(@NonNull LinearLayout rootView, @NonNull ImageButton btnNextMonth,
-      @NonNull ImageButton btnPrevMonth, @NonNull LinearLayout emptyState,
-      @NonNull FloatingActionButton fabAddEvent, @NonNull GridView gridCalendar,
-      @NonNull RecyclerView rvEvents, @NonNull MaterialButton tabDay,
-      @NonNull MaterialButton tabMonth, @NonNull MaterialButton tabWeek,
-      @NonNull MaterialToolbar toolbar, @NonNull TextView tvEventsHeader,
-      @NonNull TextView tvMonthTitle, @NonNull LinearLayout weekdaysRow) {
+  private FragmentCalendarBinding(@NonNull LinearLayout rootView, @NonNull ImageButton btnNextDay,
+      @NonNull ImageButton btnNextMonth, @NonNull ImageButton btnPrevDay,
+      @NonNull ImageButton btnPrevMonth, @NonNull MaterialButton btnTodayFloating,
+      @NonNull LinearLayout containerHours, @NonNull LinearLayout containerMonthWeek,
+      @NonNull LinearLayout emptyState, @NonNull FloatingActionButton fabAddEvent,
+      @NonNull GridView gridCalendar, @NonNull RelativeLayout layoutDaySchedule,
+      @NonNull LinearLayout layoutDayTitleNav, @NonNull RelativeLayout layoutNavMonth,
+      @NonNull RecyclerView rvEvents, @NonNull ScrollView scrollViewHourly,
+      @NonNull MaterialButton tabDay, @NonNull MaterialButton tabMonth,
+      @NonNull MaterialButton tabWeek, @NonNull MaterialButtonToggleGroup toggleGroupView,
+      @NonNull MaterialToolbar toolbar, @NonNull TextView tvCurrentTimeLabel,
+      @NonNull TextView tvDayViewTitle, @NonNull TextView tvEventsHeader,
+      @NonNull TextView tvMonthTitle, @NonNull LinearLayout viewCurrentTimeIndicator,
+      @NonNull View viewRedLine, @NonNull LinearLayout weekdaysRow) {
     this.rootView = rootView;
+    this.btnNextDay = btnNextDay;
     this.btnNextMonth = btnNextMonth;
+    this.btnPrevDay = btnPrevDay;
     this.btnPrevMonth = btnPrevMonth;
+    this.btnTodayFloating = btnTodayFloating;
+    this.containerHours = containerHours;
+    this.containerMonthWeek = containerMonthWeek;
     this.emptyState = emptyState;
     this.fabAddEvent = fabAddEvent;
     this.gridCalendar = gridCalendar;
+    this.layoutDaySchedule = layoutDaySchedule;
+    this.layoutDayTitleNav = layoutDayTitleNav;
+    this.layoutNavMonth = layoutNavMonth;
     this.rvEvents = rvEvents;
+    this.scrollViewHourly = scrollViewHourly;
     this.tabDay = tabDay;
     this.tabMonth = tabMonth;
     this.tabWeek = tabWeek;
+    this.toggleGroupView = toggleGroupView;
     this.toolbar = toolbar;
+    this.tvCurrentTimeLabel = tvCurrentTimeLabel;
+    this.tvDayViewTitle = tvDayViewTitle;
     this.tvEventsHeader = tvEventsHeader;
     this.tvMonthTitle = tvMonthTitle;
+    this.viewCurrentTimeIndicator = viewCurrentTimeIndicator;
+    this.viewRedLine = viewRedLine;
     this.weekdaysRow = weekdaysRow;
   }
 
@@ -114,15 +180,45 @@ public final class FragmentCalendarBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.btn_next_day;
+      ImageButton btnNextDay = ViewBindings.findChildViewById(rootView, id);
+      if (btnNextDay == null) {
+        break missingId;
+      }
+
       id = R.id.btn_next_month;
       ImageButton btnNextMonth = ViewBindings.findChildViewById(rootView, id);
       if (btnNextMonth == null) {
         break missingId;
       }
 
+      id = R.id.btn_prev_day;
+      ImageButton btnPrevDay = ViewBindings.findChildViewById(rootView, id);
+      if (btnPrevDay == null) {
+        break missingId;
+      }
+
       id = R.id.btn_prev_month;
       ImageButton btnPrevMonth = ViewBindings.findChildViewById(rootView, id);
       if (btnPrevMonth == null) {
+        break missingId;
+      }
+
+      id = R.id.btn_today_floating;
+      MaterialButton btnTodayFloating = ViewBindings.findChildViewById(rootView, id);
+      if (btnTodayFloating == null) {
+        break missingId;
+      }
+
+      id = R.id.container_hours;
+      LinearLayout containerHours = ViewBindings.findChildViewById(rootView, id);
+      if (containerHours == null) {
+        break missingId;
+      }
+
+      id = R.id.container_month_week;
+      LinearLayout containerMonthWeek = ViewBindings.findChildViewById(rootView, id);
+      if (containerMonthWeek == null) {
         break missingId;
       }
 
@@ -144,9 +240,33 @@ public final class FragmentCalendarBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.layout_day_schedule;
+      RelativeLayout layoutDaySchedule = ViewBindings.findChildViewById(rootView, id);
+      if (layoutDaySchedule == null) {
+        break missingId;
+      }
+
+      id = R.id.layout_day_title_nav;
+      LinearLayout layoutDayTitleNav = ViewBindings.findChildViewById(rootView, id);
+      if (layoutDayTitleNav == null) {
+        break missingId;
+      }
+
+      id = R.id.layout_nav_month;
+      RelativeLayout layoutNavMonth = ViewBindings.findChildViewById(rootView, id);
+      if (layoutNavMonth == null) {
+        break missingId;
+      }
+
       id = R.id.rv_events;
       RecyclerView rvEvents = ViewBindings.findChildViewById(rootView, id);
       if (rvEvents == null) {
+        break missingId;
+      }
+
+      id = R.id.scroll_view_hourly;
+      ScrollView scrollViewHourly = ViewBindings.findChildViewById(rootView, id);
+      if (scrollViewHourly == null) {
         break missingId;
       }
 
@@ -168,9 +288,27 @@ public final class FragmentCalendarBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.toggle_group_view;
+      MaterialButtonToggleGroup toggleGroupView = ViewBindings.findChildViewById(rootView, id);
+      if (toggleGroupView == null) {
+        break missingId;
+      }
+
       id = R.id.toolbar;
       MaterialToolbar toolbar = ViewBindings.findChildViewById(rootView, id);
       if (toolbar == null) {
+        break missingId;
+      }
+
+      id = R.id.tv_current_time_label;
+      TextView tvCurrentTimeLabel = ViewBindings.findChildViewById(rootView, id);
+      if (tvCurrentTimeLabel == null) {
+        break missingId;
+      }
+
+      id = R.id.tv_day_view_title;
+      TextView tvDayViewTitle = ViewBindings.findChildViewById(rootView, id);
+      if (tvDayViewTitle == null) {
         break missingId;
       }
 
@@ -186,15 +324,30 @@ public final class FragmentCalendarBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.view_current_time_indicator;
+      LinearLayout viewCurrentTimeIndicator = ViewBindings.findChildViewById(rootView, id);
+      if (viewCurrentTimeIndicator == null) {
+        break missingId;
+      }
+
+      id = R.id.view_red_line;
+      View viewRedLine = ViewBindings.findChildViewById(rootView, id);
+      if (viewRedLine == null) {
+        break missingId;
+      }
+
       id = R.id.weekdays_row;
       LinearLayout weekdaysRow = ViewBindings.findChildViewById(rootView, id);
       if (weekdaysRow == null) {
         break missingId;
       }
 
-      return new FragmentCalendarBinding((LinearLayout) rootView, btnNextMonth, btnPrevMonth,
-          emptyState, fabAddEvent, gridCalendar, rvEvents, tabDay, tabMonth, tabWeek, toolbar,
-          tvEventsHeader, tvMonthTitle, weekdaysRow);
+      return new FragmentCalendarBinding((LinearLayout) rootView, btnNextDay, btnNextMonth,
+          btnPrevDay, btnPrevMonth, btnTodayFloating, containerHours, containerMonthWeek,
+          emptyState, fabAddEvent, gridCalendar, layoutDaySchedule, layoutDayTitleNav,
+          layoutNavMonth, rvEvents, scrollViewHourly, tabDay, tabMonth, tabWeek, toggleGroupView,
+          toolbar, tvCurrentTimeLabel, tvDayViewTitle, tvEventsHeader, tvMonthTitle,
+          viewCurrentTimeIndicator, viewRedLine, weekdaysRow);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

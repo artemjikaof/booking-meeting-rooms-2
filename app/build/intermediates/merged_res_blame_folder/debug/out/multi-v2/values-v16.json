@@ -4,17 +4,7 @@
             "outputFile": "com.example.roombooking.app-mergeDebugResources-55:/values-v16/values-v16.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\elena\\.gradle\\caches\\transforms-3\\7a4a285e921dc283a27b31185f44fceb\\transformed\\core-1.12.0\\res\\values-v16\\values-v16.xml",
-                    "from": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "55",
-                        "endColumns": "65",
-                        "endOffsets": "116"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\elena\\.gradle\\caches\\transforms-3\\f1f61a07025a31398dabbcb10085a830\\transformed\\appcompat-1.6.1\\res\\values-v16\\values-v16.xml",
+                    "source": "C:\\Users\\Mechrevo\\.gradle\\caches\\transforms-3\\f1f61a07025a31398dabbcb10085a830\\transformed\\appcompat-1.6.1\\res\\values-v16\\values-v16.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
@@ -30,6 +20,16 @@
                         "endLines": "6",
                         "endColumns": "12",
                         "endOffsets": "289"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\Mechrevo\\.gradle\\caches\\transforms-3\\7a4a285e921dc283a27b31185f44fceb\\transformed\\core-1.12.0\\res\\values-v16\\values-v16.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "65",
+                        "endOffsets": "116"
                     }
                 }
             ]

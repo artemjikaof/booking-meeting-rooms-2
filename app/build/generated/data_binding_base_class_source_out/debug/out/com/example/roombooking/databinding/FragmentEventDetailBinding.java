@@ -4,14 +4,13 @@ package com.example.roombooking.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.example.roombooking.R;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -19,16 +18,13 @@ import java.lang.String;
 
 public final class FragmentEventDetailBinding implements ViewBinding {
   @NonNull
-  private final LinearLayout rootView;
+  private final NestedScrollView rootView;
 
   @NonNull
   public final MaterialButton btnDelete;
 
   @NonNull
   public final MaterialButton btnEdit;
-
-  @NonNull
-  public final MaterialToolbar toolbar;
 
   @NonNull
   public final TextView tvDate;
@@ -51,15 +47,13 @@ public final class FragmentEventDetailBinding implements ViewBinding {
   @NonNull
   public final TextView tvTitle;
 
-  private FragmentEventDetailBinding(@NonNull LinearLayout rootView,
-      @NonNull MaterialButton btnDelete, @NonNull MaterialButton btnEdit,
-      @NonNull MaterialToolbar toolbar, @NonNull TextView tvDate, @NonNull TextView tvDescription,
-      @NonNull TextView tvParticipants, @NonNull TextView tvRoom, @NonNull TextView tvSyncStatus,
-      @NonNull TextView tvTime, @NonNull TextView tvTitle) {
+  private FragmentEventDetailBinding(@NonNull NestedScrollView rootView,
+      @NonNull MaterialButton btnDelete, @NonNull MaterialButton btnEdit, @NonNull TextView tvDate,
+      @NonNull TextView tvDescription, @NonNull TextView tvParticipants, @NonNull TextView tvRoom,
+      @NonNull TextView tvSyncStatus, @NonNull TextView tvTime, @NonNull TextView tvTitle) {
     this.rootView = rootView;
     this.btnDelete = btnDelete;
     this.btnEdit = btnEdit;
-    this.toolbar = toolbar;
     this.tvDate = tvDate;
     this.tvDescription = tvDescription;
     this.tvParticipants = tvParticipants;
@@ -71,7 +65,7 @@ public final class FragmentEventDetailBinding implements ViewBinding {
 
   @Override
   @NonNull
-  public LinearLayout getRoot() {
+  public NestedScrollView getRoot() {
     return rootView;
   }
 
@@ -105,12 +99,6 @@ public final class FragmentEventDetailBinding implements ViewBinding {
       id = R.id.btn_edit;
       MaterialButton btnEdit = ViewBindings.findChildViewById(rootView, id);
       if (btnEdit == null) {
-        break missingId;
-      }
-
-      id = R.id.toolbar;
-      MaterialToolbar toolbar = ViewBindings.findChildViewById(rootView, id);
-      if (toolbar == null) {
         break missingId;
       }
 
@@ -156,8 +144,8 @@ public final class FragmentEventDetailBinding implements ViewBinding {
         break missingId;
       }
 
-      return new FragmentEventDetailBinding((LinearLayout) rootView, btnDelete, btnEdit, toolbar,
-          tvDate, tvDescription, tvParticipants, tvRoom, tvSyncStatus, tvTime, tvTitle);
+      return new FragmentEventDetailBinding((NestedScrollView) rootView, btnDelete, btnEdit, tvDate,
+          tvDescription, tvParticipants, tvRoom, tvSyncStatus, tvTime, tvTitle);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

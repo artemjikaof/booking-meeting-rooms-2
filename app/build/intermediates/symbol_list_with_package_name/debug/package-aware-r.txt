@@ -3036,9 +3036,12 @@ drawable avd_hide_password
 drawable avd_show_password
 drawable badge_background
 drawable badge_background_teal
+drawable bg_date_oval
 drawable bg_day_selected
 drawable bg_day_today
+drawable bg_event_rect
 drawable bg_spinner
+drawable bg_white_rounded_top
 drawable btn_checkbox_checked_mtrl
 drawable btn_checkbox_checked_to_unchecked_mtrl_animation
 drawable btn_checkbox_unchecked_mtrl
@@ -3057,6 +3060,7 @@ drawable ic_add
 drawable ic_arrow_back
 drawable ic_arrow_back_black_24
 drawable ic_arrow_next
+drawable ic_bottom_sheet_handle
 drawable ic_calendar
 drawable ic_call_answer
 drawable ic_call_answer_low
@@ -3221,7 +3225,6 @@ id action_divider
 id action_eventDetail_to_editEvent
 id action_eventsList_to_addEvent
 id action_eventsList_to_eventDetail
-id action_filter
 id action_image
 id action_menu_divider
 id action_menu_presenter
@@ -3272,7 +3275,9 @@ id btn_date_end
 id btn_date_start
 id btn_delete
 id btn_edit
+id btn_next_day
 id btn_next_month
+id btn_prev_day
 id btn_prev_month
 id btn_reset
 id btn_save
@@ -3281,6 +3286,7 @@ id btn_select_calendar
 id btn_sync_now
 id btn_time_end
 id btn_time_start
+id btn_today_floating
 id buttonPanel
 id cache_measures
 id calendarFragment
@@ -3310,6 +3316,8 @@ id compress
 id confirm_button
 id constraint
 id container
+id container_hours
+id container_month_week
 id content
 id contentPanel
 id contiguous
@@ -3433,6 +3441,9 @@ id jumpToEnd
 id jumpToStart
 id labeled
 id layout
+id layout_day_schedule
+id layout_day_title_nav
+id layout_nav_month
 id left
 id leftToRight
 id legacy
@@ -3587,6 +3598,7 @@ id scroll
 id scrollIndicatorDown
 id scrollIndicatorUp
 id scrollView
+id scroll_view_hourly
 id scrollable
 id search_badge
 id search_bar
@@ -3683,6 +3695,7 @@ id title
 id titleDividerNoCustom
 id title_template
 id toggle
+id toggle_group_view
 id toolbar
 id top
 id topPanel
@@ -3696,10 +3709,14 @@ id transition_scene_layoutid_cache
 id transition_transform
 id triangle
 id tv_capacity
+id tv_current_time_label
 id tv_date
 id tv_day
+id tv_day_view_title
 id tv_description
+id tv_event_title
 id tv_events_header
+id tv_hour
 id tv_last_sync
 id tv_month_title
 id tv_name
@@ -3715,8 +3732,10 @@ id unlabeled
 id up
 id useLogo
 id vertical_only
+id view_current_time_indicator
 id view_dot
 id view_offset_helper
+id view_red_line
 id view_transition
 id view_tree_lifecycle_owner
 id view_tree_on_back_pressed_dispatcher_owner
@@ -3880,6 +3899,8 @@ layout ime_secondary_split_test_activity
 layout item_calendar_day
 layout item_calendar_month_header
 layout item_event
+layout item_event_rect
+layout item_hour
 layout item_room
 layout m3_alert_dialog
 layout m3_alert_dialog_actions
@@ -4158,6 +4179,8 @@ style Animation_Material3_SideSheetDialog
 style Animation_Material3_SideSheetDialog_Left
 style Animation_Material3_SideSheetDialog_Right
 style Animation_MaterialComponents_BottomSheetDialog
+style AppBottomSheetDialogTheme
+style AppBottomSheetStyle
 style Base_AlertDialog_AppCompat
 style Base_AlertDialog_AppCompat_Light
 style Base_Animation_AppCompat_Dialog
@@ -4488,6 +4511,7 @@ style RtlOverlay_Widget_AppCompat_Search_DropDown_Text
 style RtlOverlay_Widget_AppCompat_SearchView_MagIcon
 style RtlUnderlay_Widget_AppCompat_ActionButton
 style RtlUnderlay_Widget_AppCompat_ActionButton_Overflow
+style ShapeAppearance_App_BottomSheet
 style ShapeAppearance_M3_Comp_Badge_Large_Shape
 style ShapeAppearance_M3_Comp_Badge_Shape
 style ShapeAppearance_M3_Comp_BottomAppBar_Container_Shape

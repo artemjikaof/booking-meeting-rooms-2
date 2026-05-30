@@ -51,7 +51,7 @@
         tools:layout="@layout/fragment_settings" />
 
     <!-- Детали мероприятия -->
-    <fragment
+    <dialog
         android:id="@+id/eventDetailFragment"
         android:name="com.example.roombooking.presentation.events.EventDetailFragment"
         android:label="Мероприятие"
@@ -59,34 +59,36 @@
         <argument android:name="eventId" app:argType="long" />
         <action android:id="@+id/action_eventDetail_to_editEvent"
             app:destination="@id/addEditEventFragment" />
-    </fragment>
+    </dialog>
 
     <!-- Добавление/редактирование мероприятия -->
-    <fragment
+    <dialog
         android:id="@+id/addEditEventFragment"
         android:name="com.example.roombooking.presentation.events.AddEditEventFragment"
         android:label="Мероприятие"
         tools:layout="@layout/fragment_add_edit_event">
         <argument android:name="eventId" app:argType="long" android:defaultValue="-1L" />
-    </fragment>
+        <argument android:name="initialDate" app:argType="string" app:nullable="true" android:defaultValue="@null" />
+        <argument android:name="initialTime" app:argType="string" app:nullable="true" android:defaultValue="@null" />
+    </dialog>
 
     <!-- Детали помещения -->
-    <fragment
+    <dialog
         android:id="@+id/roomDetailFragment"
         android:name="com.example.roombooking.presentation.rooms.RoomDetailFragment"
         android:label="Помещение"
         tools:layout="@layout/fragment_room_detail">
         <argument android:name="roomId" app:argType="long" />
-    </fragment>
+    </dialog>
 
     <!-- Добавление/редактирование помещения -->
-    <fragment
+    <dialog
         android:id="@+id/addEditRoomFragment"
         android:name="com.example.roombooking.presentation.rooms.AddEditRoomFragment"
         android:label="Помещение"
         tools:layout="@layout/fragment_add_edit_room">
         <argument android:name="roomId" app:argType="long" android:defaultValue="-1L" />
-    </fragment>
+    </dialog>
 
     <!-- Фильтр -->
     <fragment
