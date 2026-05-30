@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_event_rect"
+    android:paddingHorizontal="8dp"
+    android:paddingVertical="4dp">
+
+    <TextView
+        android:id="@+id/tv_event_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:textColor="#424242"
+        android:ellipsize="end"
+        android:maxLines="2" />
+
+</LinearLayout>
