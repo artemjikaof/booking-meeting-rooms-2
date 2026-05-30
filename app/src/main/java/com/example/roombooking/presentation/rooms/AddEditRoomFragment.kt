@@ -8,11 +8,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.roombooking.databinding.FragmentAddEditRoomBinding
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class AddEditRoomFragment : Fragment() {
+class AddEditRoomFragment : BottomSheetDialogFragment() {
 
     private var _binding: FragmentAddEditRoomBinding? = null
     private val binding get() = _binding!!
@@ -25,7 +26,12 @@ class AddEditRoomFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+
+        dialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.let {
+            val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(it)
+            behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+        }
+
         binding.btnSave.setOnClickListener {
             val name = binding.etName.text.toString()
             val cap = binding.etCapacity.text.toString().toIntOrNull() ?: 0

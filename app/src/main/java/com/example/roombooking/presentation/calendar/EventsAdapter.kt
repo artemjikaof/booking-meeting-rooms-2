@@ -55,7 +55,13 @@ class EventsAdapter(
             val (badgeText, badgeColorRes) = when {
                 event.isPast -> Pair("Прошедшее", R.color.badge_past_bg)
                 event.isToday -> Pair("Сегодня", R.color.badge_today_bg)
-                else -> Pair("Предстоящее", R.color.badge_upcoming_bg)
+                else -> {
+                    val dateStr = try {
+                        val date = java.time.LocalDate.parse(event.dateStart)
+                        " (${date.format(DateTimeFormatter.ofPattern("dd.MM"))})"
+                    } catch (e: Exception) { "" }
+                    Pair("Предстоящее$dateStr", R.color.badge_upcoming_bg)
+                }
             }
             binding.tvStatusBadge.text = badgeText
             binding.tvStatusBadge.backgroundTintList =

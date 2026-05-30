@@ -7,8 +7,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import androidx.annotation.CallSuper;
 import androidx.annotation.MainThread;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import dagger.hilt.android.flags.FragmentGetContextFix;
 import dagger.hilt.android.internal.lifecycle.DefaultViewModelFactories;
 import dagger.hilt.android.internal.managers.FragmentComponentManager;
@@ -24,7 +24,7 @@ import javax.annotation.processing.Generated;
  * A generated base class to be extended by the @dagger.hilt.android.AndroidEntryPoint annotated class. If using the Gradle plugin, this is swapped as the base class via bytecode transformation.
  */
 @Generated("dagger.hilt.android.processor.internal.androidentrypoint.FragmentGenerator")
-public abstract class Hilt_EventDetailFragment extends Fragment implements GeneratedComponentManagerHolder {
+public abstract class Hilt_EventDetailFragment extends BottomSheetDialogFragment implements GeneratedComponentManagerHolder {
   private ContextWrapper componentContext;
 
   private boolean disableGetContextFix;

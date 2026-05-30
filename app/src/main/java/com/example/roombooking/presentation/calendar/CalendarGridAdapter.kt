@@ -16,30 +16,34 @@ class CalendarGridAdapter(
     private var selectedDate: LocalDate,
     private var currentMonth: YearMonth,
     private var datesWithEvents: Set<String>,
+    private var viewMode: CalendarViewMode = CalendarViewMode.MONTH,
     private val onDateClick: (LocalDate) -> Unit
 ) : BaseAdapter() {
 
     private var days: List<LocalDate?> = buildDays()
 
-    fun update(selected: LocalDate, month: YearMonth, events: Set<String>) {
+    fun update(selected: LocalDate, month: YearMonth, events: Set<String>, mode: CalendarViewMode) {
         selectedDate = selected
         currentMonth = month
         datesWithEvents = events
+        viewMode = mode
         days = buildDays()
         notifyDataSetChanged()
     }
 
     private fun buildDays(): List<LocalDate?> {
+        if (viewMode == CalendarViewMode.WEEK) {
+            // Берем текущую неделю (Пн-Вс), в которой находится selectedDate
+            val monday = selectedDate.minusDays((selectedDate.dayOfWeek.value - 1).toLong())
+            return (0..6).map { monday.plusDays(it.toLong()) }
+        }
+
         val firstDay = currentMonth.atDay(1)
-        // Понедельник = 1, сдвиг: Mon=0 offset
-        val dayOfWeek = firstDay.dayOfWeek.value - 1 // Mon=0..Sun=6
+        val dayOfWeek = firstDay.dayOfWeek.value - 1
         val daysInMonth = currentMonth.lengthOfMonth()
         val cells = mutableListOf<LocalDate?>()
-        // Пустые ячейки до первого дня
         repeat(dayOfWeek) { cells.add(null) }
-        // Дни месяца
         for (d in 1..daysInMonth) cells.add(currentMonth.atDay(d))
-        // Добить до кратного 7
         while (cells.size % 7 != 0) cells.add(null)
         return cells
     }

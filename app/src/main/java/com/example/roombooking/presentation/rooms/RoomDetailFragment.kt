@@ -7,13 +7,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.example.roombooking.R
 import com.example.roombooking.databinding.FragmentRoomDetailBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class RoomDetailFragment : Fragment() {
+class RoomDetailFragment : BottomSheetDialogFragment() {
 
     private var _binding: FragmentRoomDetailBinding? = null
     private val binding get() = _binding!!
@@ -27,9 +29,18 @@ class RoomDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        dialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.let {
+            val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(it)
+            behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+        }
+
         roomId = arguments?.getLong("roomId", -1L) ?: -1L
 
-        binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+        binding.btnEdit.setOnClickListener {
+            val bundle = Bundle().apply { putLong("roomId", roomId) }
+            findNavController().navigate(R.id.addEditRoomFragment, bundle)
+        }
         binding.btnDelete.setOnClickListener { confirmDelete() }
 
         viewLifecycleOwner.lifecycleScope.launch {

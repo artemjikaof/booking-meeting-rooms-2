@@ -11,12 +11,13 @@ import com.example.roombooking.data.repository.EventRepository
 import com.example.roombooking.databinding.FragmentEventDetailBinding
 import com.example.roombooking.domain.model.Event
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class EventDetailFragment : Fragment() {
+class EventDetailFragment : BottomSheetDialogFragment() {
 
     private var _binding: FragmentEventDetailBinding? = null
     private val binding get() = _binding!!
@@ -31,8 +32,13 @@ class EventDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        dialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.let {
+            val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(it)
+            behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+        }
+
         val eventId = arguments?.getLong("eventId", -1L) ?: -1L
-        binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
         binding.btnEdit.setOnClickListener {
             val bundle = android.os.Bundle().apply { putLong("eventId", eventId) }
             findNavController().navigate(R.id.addEditEventFragment, bundle)

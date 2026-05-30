@@ -10,10 +10,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import com.example.roombooking.databinding.FragmentAddEditEventBinding
 import com.example.roombooking.domain.model.Room
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @AndroidEntryPoint
-class AddEditEventFragment : Fragment() {
+class AddEditEventFragment : BottomSheetDialogFragment() {
 
     private var _binding: FragmentAddEditEventBinding? = null
     private val binding get() = _binding!!
@@ -46,6 +46,41 @@ class AddEditEventFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // Расширяем BottomSheet на весь экран по ширине
+        dialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.let {
+            val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(it)
+            behavior.peekHeight = resources.displayMetrics.heightPixels // Или любая большая величина
+            behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
+        }
+
+        val initialDate = arguments?.getString("initialDate")
+        initialDate?.let {
+            try {
+                val date = LocalDate.parse(it)
+                selectedDateStart = date
+                selectedDateEnd = date
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        val initialTime = arguments?.getString("initialTime")
+        initialTime?.let {
+            try {
+                val time = LocalTime.parse(it)
+                selectedTimeStart = time
+                selectedTimeEnd = time.plusHours(1)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        val eventId = arguments?.getLong("eventId", -1L) ?: -1L
+        if (eventId != -1L) {
+            viewModel.loadEvent(eventId)
+        }
+
         updateDisplays()
         setupClicks()
         observeViewModel()
@@ -61,6 +96,21 @@ class AddEditEventFragment : Fragment() {
     }
 
     private fun observeViewModel() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.currentEvent.collect { event ->
+                event?.let {
+                    binding.etTitle.setText(it.title)
+                    binding.etDescription.setText(it.description)
+                    binding.etParticipants.setText(it.participants)
+                    binding.switchSyncCalendar.isChecked = it.syncToDeviceCalendar
+                    selectedDateStart = LocalDate.parse(it.dateStart)
+                    selectedDateEnd = LocalDate.parse(it.dateEnd)
+                    selectedTimeStart = LocalTime.parse(it.timeStart)
+                    selectedTimeEnd = LocalTime.parse(it.timeEnd)
+                    updateDisplays()
+                }
+            }
+        }
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.rooms.collect { rooms ->
                 val names = rooms.map { it.name }
@@ -110,8 +160,12 @@ class AddEditEventFragment : Fragment() {
         val d = if (isStart) selectedDateStart else selectedDateEnd
         DatePickerDialog(requireContext(), { _, y, m, day ->
             val picked = LocalDate.of(y, m + 1, day)
-            if (isStart) { selectedDateStart = picked; if (picked > selectedDateEnd) selectedDateEnd = picked }
-            else selectedDateEnd = picked
+            if (isStart) { 
+                selectedDateStart = picked
+                if (picked > selectedDateEnd) selectedDateEnd = picked 
+            } else {
+                selectedDateEnd = picked
+            }
             updateDisplays()
         }, d.year, d.monthValue - 1, d.dayOfMonth).show()
     }
@@ -119,8 +173,13 @@ class AddEditEventFragment : Fragment() {
     private fun pickTime(isStart: Boolean) {
         val t = if (isStart) selectedTimeStart else selectedTimeEnd
         TimePickerDialog(requireContext(), { _, h, min ->
-            if (isStart) selectedTimeStart = LocalTime.of(h, min)
-            else selectedTimeEnd = LocalTime.of(h, min)
+            val picked = LocalTime.of(h, min)
+            if (isStart) {
+                selectedTimeStart = picked
+                selectedTimeEnd = picked.plusHours(1)
+            } else {
+                selectedTimeEnd = picked
+            }
             updateDisplays()
         }, t.hour, t.minute, true).show()
     }

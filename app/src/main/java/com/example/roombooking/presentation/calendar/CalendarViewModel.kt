@@ -33,19 +33,67 @@ class CalendarViewModel @Inject constructor(
 
     init { loadDatesWithEvents() }
 
-    fun selectDate(date: LocalDate) { _selectedDate.value = date }
+    fun selectDate(date: LocalDate) { 
+        _selectedDate.value = date 
+        // Если выбранная дата в другом месяце, переключаем текущий месяц
+        val monthOfDate = YearMonth.from(date)
+        if (_currentMonth.value != monthOfDate) {
+            _currentMonth.value = monthOfDate
+            loadDatesWithEvents()
+        }
+    }
+
+    fun selectToday() {
+        _selectedDate.value = LocalDate.now()
+        _currentMonth.value = YearMonth.now()
+        loadDatesWithEvents()
+    }
 
     fun navigateToPreviousMonth() {
-        _currentMonth.value = _currentMonth.value.minusMonths(1)
-        loadDatesWithEvents()
+        when (_viewMode.value) {
+            CalendarViewMode.MONTH -> {
+                _currentMonth.value = _currentMonth.value.minusMonths(1)
+                loadDatesWithEvents()
+            }
+            CalendarViewMode.WEEK -> {
+                _selectedDate.value = _selectedDate.value.minusWeeks(1)
+                _currentMonth.value = YearMonth.from(_selectedDate.value)
+                loadDatesWithEvents()
+            }
+            CalendarViewMode.DAY -> {
+                _selectedDate.value = _selectedDate.value.minusDays(1)
+                _currentMonth.value = YearMonth.from(_selectedDate.value)
+                loadDatesWithEvents()
+            }
+        }
     }
 
     fun navigateToNextMonth() {
-        _currentMonth.value = _currentMonth.value.plusMonths(1)
-        loadDatesWithEvents()
+        when (_viewMode.value) {
+            CalendarViewMode.MONTH -> {
+                _currentMonth.value = _currentMonth.value.plusMonths(1)
+                loadDatesWithEvents()
+            }
+            CalendarViewMode.WEEK -> {
+                _selectedDate.value = _selectedDate.value.plusWeeks(1)
+                _currentMonth.value = YearMonth.from(_selectedDate.value)
+                loadDatesWithEvents()
+            }
+            CalendarViewMode.DAY -> {
+                _selectedDate.value = _selectedDate.value.plusDays(1)
+                _currentMonth.value = YearMonth.from(_selectedDate.value)
+                loadDatesWithEvents()
+            }
+        }
     }
 
-    fun setViewMode(mode: CalendarViewMode) { _viewMode.value = mode }
+    fun setViewMode(mode: CalendarViewMode) { 
+        _viewMode.value = mode 
+        if (mode == CalendarViewMode.WEEK || mode == CalendarViewMode.DAY) {
+            // Убеждаемся, что текущий месяц соответствует выбранной дате
+            _currentMonth.value = YearMonth.from(_selectedDate.value)
+        }
+    }
 
     private fun loadDatesWithEvents() {
         viewModelScope.launch {
