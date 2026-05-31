@@ -1,40 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <LinearLayout
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/ThemeOverlay.Material3.Dark.ActionBar"
+        android:title="Помещение"
+        app:navigationIcon="@drawable/ic_arrow_back" />
 
-        <View
-            android:layout_width="40dp"
-            android:layout_height="4dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/ic_bottom_sheet_handle" />
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Детали помещения"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp"
-            android:textColor="?attr/colorOnSurface" />
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <TextView android:id="@+id/tv_name" android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:textSize="22sp" android:textStyle="bold" />
-            <TextView android:id="@+id/tv_capacity" android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:textSize="14sp"
-                android:textColor="?attr/colorOnSurfaceVariant" android:layout_marginTop="6dp" />
-            <TextView android:id="@+id/tv_description" android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:textSize="14sp"
-                android:layout_marginTop="8dp" />
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnSurface" />
 
+            <TextView
+                android:id="@+id/tv_capacity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="15sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:layout_marginTop="6dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="?attr/colorOutline"
+                android:layout_marginVertical="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Описание"
+                android:textSize="11sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textAllCaps="true"
+                android:letterSpacing="0.05" />
+
+            <TextView
+                android:id="@+id/tv_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="?attr/colorOnSurface" />
+
+            <!-- Кнопка редактировать -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_edit"
                 android:layout_width="match_parent"
@@ -42,14 +72,15 @@
                 android:layout_marginTop="24dp"
                 android:text="Редактировать" />
 
+            <!-- Кнопка удалить -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_delete"
-                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:textColor="@color/color_error"
-                app:strokeColor="@color/color_error"
+                android:backgroundTint="@color/color_error"
                 android:text="Удалить помещение" />
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+</LinearLayout>

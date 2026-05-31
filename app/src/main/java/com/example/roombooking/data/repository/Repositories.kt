@@ -97,30 +97,48 @@ class EventRepository @Inject constructor(
     ): Boolean = eventDao.findConflicts(roomId, date, timeStart, timeEnd, excludeId).isNotEmpty()
 
     suspend fun insertEvent(event: Event): Long {
+        // Сначала сохраняем в БД — это всегда должно работать
         val id = eventDao.insertEvent(event.toEntity())
+        // Синхронизация с системным календарём — опциональна, ошибки игнорируем
         if (event.syncToDeviceCalendar && prefs.syncEnabled) {
-            val calId = prefs.selectedCalendarId
-            if (calId != null) {
-                val calEventId = calendarSyncManager.insertEventToCalendar(event, calId)
-                if (calEventId != null) {
-                    eventDao.updateEvent(event.copy(id = id, deviceCalendarEventId = calEventId).toEntity())
+            try {
+                val calId = prefs.selectedCalendarId
+                if (calId != null) {
+                    val calEventId = calendarSyncManager.insertEventToCalendar(event, calId)
+                    if (calEventId != null) {
+                        eventDao.updateEvent(event.copy(id = id, deviceCalendarEventId = calEventId).toEntity())
+                    }
                 }
+            } catch (e: Exception) {
+                android.util.Log.w("EventRepository", "Calendar sync failed on insert: ${e.message}")
             }
         }
         return id
     }
 
     suspend fun updateEvent(event: Event) {
+        // Сначала обновляем в БД
         eventDao.updateEvent(event.toEntity())
+        // Синхронизация с системным календарём — опциональна, ошибки игнорируем
         if (event.syncToDeviceCalendar && event.deviceCalendarEventId != null && prefs.syncEnabled) {
-            calendarSyncManager.updateEventInCalendar(event.deviceCalendarEventId, event)
+            try {
+                calendarSyncManager.updateEventInCalendar(event.deviceCalendarEventId, event)
+            } catch (e: Exception) {
+                android.util.Log.w("EventRepository", "Calendar sync failed on update: ${e.message}")
+            }
         }
     }
 
     suspend fun deleteEvent(event: Event) {
+        // Сначала удаляем из БД
         eventDao.deleteEvent(event.toEntity())
+        // Удаление из системного календаря — опционально, ошибки игнорируем
         if (event.deviceCalendarEventId != null && prefs.syncEnabled) {
-            calendarSyncManager.deleteEventFromCalendar(event.deviceCalendarEventId)
+            try {
+                calendarSyncManager.deleteEventFromCalendar(event.deviceCalendarEventId)
+            } catch (e: Exception) {
+                android.util.Log.w("EventRepository", "Calendar sync failed on delete: ${e.message}")
+            }
         }
     }
 

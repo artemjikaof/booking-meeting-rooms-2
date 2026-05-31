@@ -3,23 +3,29 @@ package com.example.roombooking.presentation.rooms
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.roombooking.databinding.FragmentAddEditRoomBinding
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.example.roombooking.presentation.events.UiState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class AddEditRoomFragment : BottomSheetDialogFragment() {
+class AddEditRoomFragment : Fragment() {
 
     private var _binding: FragmentAddEditRoomBinding? = null
     private val binding get() = _binding!!
     private val viewModel: RoomsViewModel by viewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    private val roomId: Long by lazy { arguments?.getLong("roomId", -1L) ?: -1L }
+    private val isEditing get() = roomId > 0L
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentAddEditRoomBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -27,25 +33,42 @@ class AddEditRoomFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        dialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.let {
-            val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(it)
-            behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
-        }
+        (activity as? AppCompatActivity)?.supportActionBar?.title =
+            if (isEditing) "Редактировать помещение" else "Новое помещение"
+
+        if (isEditing) viewModel.loadRoom(roomId)
 
         binding.btnSave.setOnClickListener {
-            val name = binding.etName.text.toString()
+            val name = binding.etName.text.toString().trim()
             val cap = binding.etCapacity.text.toString().toIntOrNull() ?: 0
-            val desc = binding.etDescription.text.toString()
+            val desc = binding.etDescription.text.toString().trim()
             viewModel.saveRoom(name, cap, desc)
         }
         binding.btnCancel.setOnClickListener { findNavController().navigateUp() }
 
+        observeViewModel()
+    }
+
+    private fun observeViewModel() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.editingRoom.collect { room ->
+                room ?: return@collect
+                binding.etName.setText(room.name)
+                binding.etCapacity.setText(room.capacity.toString())
+                binding.etDescription.setText(room.description)
+            }
+        }
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collect { state ->
                 when (state) {
-                    is com.example.roombooking.presentation.events.UiState.Success -> findNavController().navigateUp()
-                    is com.example.roombooking.presentation.events.UiState.Error ->
+                    is UiState.Success -> {
+                        viewModel.resetState()
+                        findNavController().navigateUp()
+                    }
+                    is UiState.Error -> {
                         Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                        viewModel.resetState()
+                    }
                     else -> Unit
                 }
             }

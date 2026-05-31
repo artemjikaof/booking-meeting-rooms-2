@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -13,7 +14,6 @@ import androidx.navigation.fragment.findNavController
 import com.example.roombooking.databinding.FragmentAddEditEventBinding
 import com.example.roombooking.domain.model.Room
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -22,64 +22,43 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @AndroidEntryPoint
-class AddEditEventFragment : BottomSheetDialogFragment() {
+class AddEditEventFragment : Fragment() {
 
     private var _binding: FragmentAddEditEventBinding? = null
     private val binding get() = _binding!!
     private val viewModel: AddEditEventViewModel by viewModels()
+
+    private val eventId: Long by lazy { arguments?.getLong("eventId", -1L) ?: -1L }
+    private val isEditing get() = eventId > 0L
 
     private var selectedDateStart = LocalDate.now()
     private var selectedDateEnd = LocalDate.now()
     private var selectedTimeStart = LocalTime.of(9, 0)
     private var selectedTimeEnd = LocalTime.of(10, 0)
     private var selectedRoom: Room? = null
+    private var roomsList: List<Room> = emptyList()
+    private var formFilledFromEvent = false
 
     private val dateFmt = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale("ru"))
     private val timeFmt = DateTimeFormatter.ofPattern("HH:mm", Locale("ru"))
     private val isoDate = DateTimeFormatter.ISO_LOCAL_DATE
     private val isoTime = DateTimeFormatter.ofPattern("HH:mm")
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentAddEditEventBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
-        // Расширяем BottomSheet на весь экран по ширине
-        dialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.let {
-            val behavior = com.google.android.material.bottomsheet.BottomSheetBehavior.from(it)
-            behavior.peekHeight = resources.displayMetrics.heightPixels // Или любая большая величина
-            behavior.state = com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
-        }
 
-        val initialDate = arguments?.getString("initialDate")
-        initialDate?.let {
-            try {
-                val date = LocalDate.parse(it)
-                selectedDateStart = date
-                selectedDateEnd = date
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
+        // Заголовок ActionBar
+        (activity as? AppCompatActivity)?.supportActionBar?.title =
+            if (isEditing) "Редактировать мероприятие" else "Новое мероприятие"
 
-        val initialTime = arguments?.getString("initialTime")
-        initialTime?.let {
-            try {
-                val time = LocalTime.parse(it)
-                selectedTimeStart = time
-                selectedTimeEnd = time.plusHours(1)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-
-        val eventId = arguments?.getLong("eventId", -1L) ?: -1L
-        if (eventId != -1L) {
-            viewModel.loadEvent(eventId)
-        }
+        if (isEditing) viewModel.loadEvent(eventId)
 
         updateDisplays()
         setupClicks()
@@ -97,35 +76,35 @@ class AddEditEventFragment : BottomSheetDialogFragment() {
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.currentEvent.collect { event ->
-                event?.let {
-                    binding.etTitle.setText(it.title)
-                    binding.etDescription.setText(it.description)
-                    binding.etParticipants.setText(it.participants)
-                    binding.switchSyncCalendar.isChecked = it.syncToDeviceCalendar
-                    selectedDateStart = LocalDate.parse(it.dateStart)
-                    selectedDateEnd = LocalDate.parse(it.dateEnd)
-                    selectedTimeStart = LocalTime.parse(it.timeStart)
-                    selectedTimeEnd = LocalTime.parse(it.timeEnd)
-                    updateDisplays()
-                }
-            }
-        }
-        viewLifecycleOwner.lifecycleScope.launch {
             viewModel.rooms.collect { rooms ->
-                val names = rooms.map { it.name }
-                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, names)
+                roomsList = rooms
+                val adapter = ArrayAdapter(
+                    requireContext(),
+                    android.R.layout.simple_spinner_item,
+                    rooms.map { it.name }
+                )
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 binding.spinnerRoom.adapter = adapter
-                binding.spinnerRoom.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(p: android.widget.AdapterView<*>?, v: View?, pos: Int, id: Long) {
-                        selectedRoom = rooms.getOrNull(pos)
+                binding.spinnerRoom.onItemSelectedListener =
+                    object : android.widget.AdapterView.OnItemSelectedListener {
+                        override fun onItemSelected(p: android.widget.AdapterView<*>?, v: View?, pos: Int, id: Long) {
+                            selectedRoom = rooms.getOrNull(pos)
+                        }
+                        override fun onNothingSelected(p: android.widget.AdapterView<*>?) {}
                     }
-                    override fun onNothingSelected(p: android.widget.AdapterView<*>?) {}
-                }
-                if (selectedRoom == null) selectedRoom = rooms.firstOrNull()
+                val event = viewModel.currentEvent.value
+                if (event != null && !formFilledFromEvent) fillFormFromEvent(rooms)
+                else if (selectedRoom == null) selectedRoom = rooms.firstOrNull()
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.currentEvent.collect { event ->
+                event ?: return@collect
+                if (!formFilledFromEvent) fillFormFromEvent(roomsList)
+            }
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.uiState.collect { state ->
                 when (state) {
@@ -138,20 +117,40 @@ class AddEditEventFragment : BottomSheetDialogFragment() {
         }
     }
 
+    private fun fillFormFromEvent(rooms: List<Room>) {
+        val event = viewModel.currentEvent.value ?: return
+        if (rooms.isEmpty()) return
+        formFilledFromEvent = true
+        binding.etTitle.setText(event.title)
+        binding.etDescription.setText(event.description)
+        binding.etParticipants.setText(event.participants)
+        binding.switchSyncCalendar.isChecked = event.syncToDeviceCalendar
+        selectedDateStart = LocalDate.parse(event.dateStart)
+        selectedDateEnd = LocalDate.parse(event.dateEnd)
+        selectedTimeStart = LocalTime.parse(event.timeStart)
+        selectedTimeEnd = LocalTime.parse(event.timeEnd)
+        updateDisplays()
+        val roomIndex = rooms.indexOfFirst { it.id == event.roomId }
+        if (roomIndex >= 0) {
+            binding.spinnerRoom.setSelection(roomIndex)
+            selectedRoom = rooms[roomIndex]
+        }
+    }
+
     private fun save() {
         val room = selectedRoom ?: run {
             Toast.makeText(requireContext(), "Выберите помещение", Toast.LENGTH_SHORT).show()
             return
         }
         viewModel.saveEvent(
-            title = binding.etTitle.text.toString(),
+            title = binding.etTitle.text.toString().trim(),
             dateStart = selectedDateStart.format(isoDate),
             dateEnd = selectedDateEnd.format(isoDate),
             timeStart = selectedTimeStart.format(isoTime),
             timeEnd = selectedTimeEnd.format(isoTime),
             room = room,
-            description = binding.etDescription.text.toString(),
-            participants = binding.etParticipants.text.toString(),
+            description = binding.etDescription.text.toString().trim(),
+            participants = binding.etParticipants.text.toString().trim(),
             syncToCalendar = binding.switchSyncCalendar.isChecked
         )
     }
@@ -160,12 +159,8 @@ class AddEditEventFragment : BottomSheetDialogFragment() {
         val d = if (isStart) selectedDateStart else selectedDateEnd
         DatePickerDialog(requireContext(), { _, y, m, day ->
             val picked = LocalDate.of(y, m + 1, day)
-            if (isStart) { 
-                selectedDateStart = picked
-                if (picked > selectedDateEnd) selectedDateEnd = picked 
-            } else {
-                selectedDateEnd = picked
-            }
+            if (isStart) { selectedDateStart = picked; if (picked > selectedDateEnd) selectedDateEnd = picked }
+            else selectedDateEnd = picked
             updateDisplays()
         }, d.year, d.monthValue - 1, d.dayOfMonth).show()
     }
@@ -173,13 +168,8 @@ class AddEditEventFragment : BottomSheetDialogFragment() {
     private fun pickTime(isStart: Boolean) {
         val t = if (isStart) selectedTimeStart else selectedTimeEnd
         TimePickerDialog(requireContext(), { _, h, min ->
-            val picked = LocalTime.of(h, min)
-            if (isStart) {
-                selectedTimeStart = picked
-                selectedTimeEnd = picked.plusHours(1)
-            } else {
-                selectedTimeEnd = picked
-            }
+            if (isStart) selectedTimeStart = LocalTime.of(h, min)
+            else selectedTimeEnd = LocalTime.of(h, min)
             updateDisplays()
         }, t.hour, t.minute, true).show()
     }

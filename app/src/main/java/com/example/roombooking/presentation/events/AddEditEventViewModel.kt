@@ -1,5 +1,6 @@
 package com.example.roombooking.presentation.events
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.example.roombooking.data.repository.EventRepository
 import com.example.roombooking.data.repository.RoomRepository
@@ -67,22 +68,32 @@ class AddEditEventViewModel @Inject constructor(
                 _uiState.value = UiState.ConflictDetected(room.name, "$timeStart–$timeEnd")
                 return@launch
             }
+
+            val event = Event(
+                id = _currentEvent.value?.id ?: 0L,
+                title = title, dateStart = dateStart, dateEnd = dateEnd,
+                timeStart = timeStart, timeEnd = timeEnd,
+                roomId = room.id, roomName = room.name,
+                description = description, participants = participants,
+                syncToDeviceCalendar = syncToCalendar,
+                deviceCalendarEventId = _currentEvent.value?.deviceCalendarEventId,
+                lastModifiedInApp = System.currentTimeMillis()
+            )
+
             try {
-                val event = Event(
-                    id = _currentEvent.value?.id ?: 0L,
-                    title = title, dateStart = dateStart, dateEnd = dateEnd,
-                    timeStart = timeStart, timeEnd = timeEnd,
-                    roomId = room.id, roomName = room.name,
-                    description = description, participants = participants,
-                    syncToDeviceCalendar = syncToCalendar,
-                    deviceCalendarEventId = _currentEvent.value?.deviceCalendarEventId,
-                    lastModifiedInApp = System.currentTimeMillis()
-                )
-                if (_currentEvent.value == null) eventRepository.insertEvent(event)
-                else eventRepository.updateEvent(event)
+                if (_currentEvent.value == null) {
+                    Log.d("SaveEvent", "INSERT event: $event")
+                    eventRepository.insertEvent(event)
+                } else {
+                    Log.d("SaveEvent", "UPDATE event id=${event.id}: $event")
+                    eventRepository.updateEvent(event)
+                }
                 _uiState.value = UiState.Success
             } catch (e: Exception) {
-                _uiState.value = UiState.Error(e.message ?: "Ошибка сохранения")
+                Log.e("SaveEvent", "Save failed", e)
+                // Показываем стектрейс в сообщении для отладки
+                val msg = e.cause?.message ?: e.message ?: e.javaClass.simpleName
+                _uiState.value = UiState.Error("Ошибка: $msg")
             }
         }
     }
@@ -90,7 +101,9 @@ class AddEditEventViewModel @Inject constructor(
     fun deleteEvent() {
         val event = _currentEvent.value ?: return
         viewModelScope.launch {
-            eventRepository.deleteEvent(event)
+            try { eventRepository.deleteEvent(event) } catch (e: Exception) {
+                Log.e("SaveEvent", "Delete failed", e)
+            }
             _uiState.value = UiState.Success
         }
     }
