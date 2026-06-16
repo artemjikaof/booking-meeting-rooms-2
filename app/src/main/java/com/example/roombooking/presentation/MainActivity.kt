@@ -1,13 +1,22 @@
 package com.example.roombooking.presentation
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.roombooking.R
+import com.example.roombooking.data.repository.YandexCalendarRepository
 import com.example.roombooking.databinding.ActivityMainBinding
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -26,7 +35,8 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomNavigation.setupWithNavController(navController)
 
-        // Скрываем нижнюю навигацию на экранах добавления/редактирования
+        handleYandexAuthIntent(intent)
+
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val hideNav = destination.id in listOf(
                 R.id.addEditEventFragment,
@@ -35,8 +45,34 @@ class MainActivity : AppCompatActivity() {
                 R.id.roomDetailFragment,
                 R.id.filterFragment
             )
-            binding.bottomNavigation.visibility =
-                if (hideNav) android.view.View.GONE else android.view.View.VISIBLE
+            binding.bottomNavigation.visibility = if (hideNav) View.GONE else View.VISIBLE
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        intent?.let { handleYandexAuthIntent(it) }
+    }
+
+    private fun handleYandexAuthIntent(intent: Intent) {
+        val data = intent.data
+        if (data != null && data.scheme == "roombooking" && data.host == "yandex-auth") {
+            val code = data.getQueryParameter("code")
+            if (code != null) {
+                lifecycleScope.launch {
+                    val repository = EntryPointAccessors.fromApplication(
+                        applicationContext,
+                        MainActivityEntryPoint::class.java
+                    ).yandexRepository()
+                    repository.handleAuthCode(code)
+                }
+            }
+        }
+    }
+
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface MainActivityEntryPoint {
+        fun yandexRepository(): YandexCalendarRepository
     }
 }

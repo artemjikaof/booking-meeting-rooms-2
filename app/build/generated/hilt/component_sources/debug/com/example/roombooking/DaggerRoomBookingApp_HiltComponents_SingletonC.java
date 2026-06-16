@@ -15,13 +15,22 @@ import androidx.work.WorkerParameters;
 import com.example.roombooking.data.local.AppDatabase;
 import com.example.roombooking.data.local.EventDao;
 import com.example.roombooking.data.local.RoomDao;
+import com.example.roombooking.data.local.TokenManager;
+import com.example.roombooking.data.remote.YandexAuthApi;
+import com.example.roombooking.data.remote.YandexCalendarApi;
 import com.example.roombooking.data.repository.CalendarSyncManager;
 import com.example.roombooking.data.repository.EventRepository;
 import com.example.roombooking.data.repository.RoomRepository;
 import com.example.roombooking.data.repository.SyncPreferences;
+import com.example.roombooking.data.repository.YandexCalendarRepository;
 import com.example.roombooking.di.DatabaseModule_ProvideDatabaseFactory;
 import com.example.roombooking.di.DatabaseModule_ProvideEventDaoFactory;
 import com.example.roombooking.di.DatabaseModule_ProvideRoomDaoFactory;
+import com.example.roombooking.di.NetworkModule_ProvideLoggingInterceptorFactory;
+import com.example.roombooking.di.NetworkModule_ProvideOkHttpClientFactory;
+import com.example.roombooking.di.NetworkModule_ProvideRetrofitFactory;
+import com.example.roombooking.di.NetworkModule_ProvideYandexAuthApiFactory;
+import com.example.roombooking.di.NetworkModule_ProvideYandexCalendarApiFactory;
 import com.example.roombooking.presentation.MainActivity;
 import com.example.roombooking.presentation.calendar.CalendarFragment;
 import com.example.roombooking.presentation.calendar.CalendarViewModel;
@@ -73,6 +82,9 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.processing.Generated;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Retrofit;
 
 @DaggerGenerated
 @Generated(
@@ -540,16 +552,16 @@ public final class DaggerRoomBookingApp_HiltComponents_SingletonC {
       public T get() {
         switch (id) {
           case 0: // com.example.roombooking.presentation.events.AddEditEventViewModel 
-          return (T) new AddEditEventViewModel(singletonCImpl.eventRepositoryProvider.get(), singletonCImpl.roomRepositoryProvider.get());
+          return (T) new AddEditEventViewModel(singletonCImpl.eventRepositoryProvider.get(), singletonCImpl.roomRepositoryProvider.get(), singletonCImpl.yandexCalendarRepositoryProvider.get());
 
           case 1: // com.example.roombooking.presentation.calendar.CalendarViewModel 
-          return (T) new CalendarViewModel(singletonCImpl.eventRepositoryProvider.get());
+          return (T) new CalendarViewModel(singletonCImpl.eventRepositoryProvider.get(), singletonCImpl.yandexCalendarRepositoryProvider.get());
 
           case 2: // com.example.roombooking.presentation.rooms.RoomsViewModel 
           return (T) new RoomsViewModel(singletonCImpl.roomRepositoryProvider.get());
 
           case 3: // com.example.roombooking.presentation.settings.SettingsViewModel 
-          return (T) new SettingsViewModel(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.syncPreferencesProvider.get(), singletonCImpl.calendarSyncManagerProvider.get(), singletonCImpl.eventRepositoryProvider.get());
+          return (T) new SettingsViewModel(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.syncPreferencesProvider.get(), singletonCImpl.calendarSyncManagerProvider.get(), singletonCImpl.eventRepositoryProvider.get(), singletonCImpl.yandexCalendarRepositoryProvider.get());
 
           default: throw new AssertionError(id);
         }
@@ -637,6 +649,20 @@ public final class DaggerRoomBookingApp_HiltComponents_SingletonC {
 
     private Provider<SyncPreferences> syncPreferencesProvider;
 
+    private Provider<YandexAuthApi> provideYandexAuthApiProvider;
+
+    private Provider<HttpLoggingInterceptor> provideLoggingInterceptorProvider;
+
+    private Provider<OkHttpClient> provideOkHttpClientProvider;
+
+    private Provider<Retrofit> provideRetrofitProvider;
+
+    private Provider<YandexCalendarApi> provideYandexCalendarApiProvider;
+
+    private Provider<TokenManager> tokenManagerProvider;
+
+    private Provider<YandexCalendarRepository> yandexCalendarRepositoryProvider;
+
     private Provider<EventRepository> eventRepositoryProvider;
 
     private Provider<CalendarSyncWorker_AssistedFactory> calendarSyncWorker_AssistedFactoryProvider;
@@ -671,14 +697,26 @@ public final class DaggerRoomBookingApp_HiltComponents_SingletonC {
       this.provideDatabaseProvider = DoubleCheck.provider(new SwitchingProvider<AppDatabase>(singletonCImpl, 2));
       this.calendarSyncManagerProvider = DoubleCheck.provider(new SwitchingProvider<CalendarSyncManager>(singletonCImpl, 3));
       this.syncPreferencesProvider = DoubleCheck.provider(new SwitchingProvider<SyncPreferences>(singletonCImpl, 4));
+      this.provideYandexAuthApiProvider = DoubleCheck.provider(new SwitchingProvider<YandexAuthApi>(singletonCImpl, 6));
+      this.provideLoggingInterceptorProvider = DoubleCheck.provider(new SwitchingProvider<HttpLoggingInterceptor>(singletonCImpl, 10));
+      this.provideOkHttpClientProvider = DoubleCheck.provider(new SwitchingProvider<OkHttpClient>(singletonCImpl, 9));
+      this.provideRetrofitProvider = DoubleCheck.provider(new SwitchingProvider<Retrofit>(singletonCImpl, 8));
+      this.provideYandexCalendarApiProvider = DoubleCheck.provider(new SwitchingProvider<YandexCalendarApi>(singletonCImpl, 7));
+      this.tokenManagerProvider = DoubleCheck.provider(new SwitchingProvider<TokenManager>(singletonCImpl, 11));
+      this.yandexCalendarRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<YandexCalendarRepository>(singletonCImpl, 5));
       this.eventRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<EventRepository>(singletonCImpl, 1));
       this.calendarSyncWorker_AssistedFactoryProvider = SingleCheck.provider(new SwitchingProvider<CalendarSyncWorker_AssistedFactory>(singletonCImpl, 0));
-      this.roomRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<RoomRepository>(singletonCImpl, 5));
+      this.roomRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<RoomRepository>(singletonCImpl, 12));
     }
 
     @Override
     public void injectRoomBookingApp(RoomBookingApp roomBookingApp) {
       injectRoomBookingApp2(roomBookingApp);
+    }
+
+    @Override
+    public YandexCalendarRepository yandexRepository() {
+      return yandexCalendarRepositoryProvider.get();
     }
 
     @Override
@@ -736,7 +774,7 @@ public final class DaggerRoomBookingApp_HiltComponents_SingletonC {
           };
 
           case 1: // com.example.roombooking.data.repository.EventRepository 
-          return (T) new EventRepository(singletonCImpl.eventDao(), singletonCImpl.calendarSyncManagerProvider.get(), singletonCImpl.syncPreferencesProvider.get());
+          return (T) new EventRepository(singletonCImpl.eventDao(), singletonCImpl.calendarSyncManagerProvider.get(), singletonCImpl.syncPreferencesProvider.get(), singletonCImpl.yandexCalendarRepositoryProvider.get());
 
           case 2: // com.example.roombooking.data.local.AppDatabase 
           return (T) DatabaseModule_ProvideDatabaseFactory.provideDatabase(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
@@ -747,7 +785,28 @@ public final class DaggerRoomBookingApp_HiltComponents_SingletonC {
           case 4: // com.example.roombooking.data.repository.SyncPreferences 
           return (T) new SyncPreferences(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
-          case 5: // com.example.roombooking.data.repository.RoomRepository 
+          case 5: // com.example.roombooking.data.repository.YandexCalendarRepository 
+          return (T) new YandexCalendarRepository(singletonCImpl.provideYandexAuthApiProvider.get(), singletonCImpl.provideYandexCalendarApiProvider.get(), singletonCImpl.tokenManagerProvider.get());
+
+          case 6: // com.example.roombooking.data.remote.YandexAuthApi 
+          return (T) NetworkModule_ProvideYandexAuthApiFactory.provideYandexAuthApi();
+
+          case 7: // com.example.roombooking.data.remote.YandexCalendarApi 
+          return (T) NetworkModule_ProvideYandexCalendarApiFactory.provideYandexCalendarApi(singletonCImpl.provideRetrofitProvider.get());
+
+          case 8: // retrofit2.Retrofit 
+          return (T) NetworkModule_ProvideRetrofitFactory.provideRetrofit(singletonCImpl.provideOkHttpClientProvider.get());
+
+          case 9: // okhttp3.OkHttpClient 
+          return (T) NetworkModule_ProvideOkHttpClientFactory.provideOkHttpClient(singletonCImpl.provideLoggingInterceptorProvider.get());
+
+          case 10: // okhttp3.logging.HttpLoggingInterceptor 
+          return (T) NetworkModule_ProvideLoggingInterceptorFactory.provideLoggingInterceptor();
+
+          case 11: // com.example.roombooking.data.local.TokenManager 
+          return (T) new TokenManager(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
+
+          case 12: // com.example.roombooking.data.repository.RoomRepository 
           return (T) new RoomRepository(singletonCImpl.roomDao());
 
           default: throw new AssertionError(id);

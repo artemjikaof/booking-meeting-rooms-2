@@ -58,6 +58,9 @@ interface EventDao {
         excludeId: Long = 0L
     ): List<EventEntity>
 
+    @Query("SELECT * FROM events")
+    suspend fun getAllEventsSync(): List<EventEntity>
+
     @Query("SELECT * FROM events WHERE syncToDeviceCalendar = 1")
     suspend fun getSyncableEvents(): List<EventEntity>
 

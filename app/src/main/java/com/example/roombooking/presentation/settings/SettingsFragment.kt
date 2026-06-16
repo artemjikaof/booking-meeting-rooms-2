@@ -68,6 +68,14 @@ class SettingsFragment : Fragment() {
 
         binding.btnSyncNow.setOnClickListener { viewModel.syncNow() }
 
+        binding.btnConnectYandex.setOnClickListener {
+            val intent = android.content.Intent(
+                android.content.Intent.ACTION_VIEW,
+                android.net.Uri.parse(com.example.roombooking.util.YandexConfig.getAuthUrl())
+            )
+            startActivity(intent)
+        }
+
         binding.btnSaveFilterTags.setOnClickListener {
             viewModel.setFilterTags(binding.etFilterTags.text.toString())
             Toast.makeText(requireContext(), "Метки сохранены", Toast.LENGTH_SHORT).show()
@@ -75,6 +83,18 @@ class SettingsFragment : Fragment() {
     }
 
     private fun observeViewModel() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.yandexAuthorized.collect { authorized ->
+                binding.tvYandexStatus.text = if (authorized) "Подключено ✓" else "Не подключено"
+                binding.tvYandexStatus.setTextColor(
+                    if (authorized) 
+                        androidx.core.content.ContextCompat.getColor(requireContext(), android.R.color.holo_green_dark)
+                    else 
+                        androidx.core.content.ContextCompat.getColor(requireContext(), android.R.color.holo_red_dark)
+                )
+                binding.btnConnectYandex.text = if (authorized) "Переподключить" else "Подключить Яндекс Календарь"
+            }
+        }
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.syncEnabled.collect { enabled ->
                 binding.switchSync.isChecked = enabled

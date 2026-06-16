@@ -3271,6 +3271,7 @@ id bounceEnd
 id bounceStart
 id btn_apply
 id btn_cancel
+id btn_connect_yandex
 id btn_date_end
 id btn_date_start
 id btn_delete
@@ -3726,6 +3727,7 @@ id tv_status_badge
 id tv_sync_status
 id tv_time
 id tv_title
+id tv_yandex_status
 id unchecked
 id uniform
 id unlabeled

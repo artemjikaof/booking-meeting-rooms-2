@@ -17,12 +17,14 @@ sealed class UiState {
     object Success : UiState()
     data class Error(val message: String) : UiState()
     data class ConflictDetected(val roomName: String, val time: String) : UiState()
+    data class YandexConflictDetected(val summary: String, val time: String) : UiState()
 }
 
 @HiltViewModel
 class AddEditEventViewModel @Inject constructor(
     private val eventRepository: EventRepository,
-    private val roomRepository: RoomRepository
+    private val roomRepository: RoomRepository,
+    private val yandexRepository: com.example.roombooking.data.repository.YandexCalendarRepository
 ) : ViewModel() {
 
     val rooms: StateFlow<List<Room>> = roomRepository.getAllRooms()
@@ -30,6 +32,10 @@ class AddEditEventViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Idle)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    private var forceSave: Boolean = false
+
+    fun setForceSave(value: Boolean) { forceSave = value }
 
     private val _currentEvent = MutableStateFlow<Event?>(null)
     val currentEvent: StateFlow<Event?> = _currentEvent.asStateFlow()
@@ -67,6 +73,32 @@ class AddEditEventViewModel @Inject constructor(
             if (hasConflict) {
                 _uiState.value = UiState.ConflictDetected(room.name, "$timeStart–$timeEnd")
                 return@launch
+            }
+
+            // Проверка конфликтов в Яндекс Календаре (ТЗ 2.6)
+            if (yandexRepository.isAuthorized() && !forceSave) {
+                val yandexEvents = yandexRepository.getYandexEvents(
+                    from = "${dateStart}T00:00:00+03:00",
+                    to = "${dateStart}T23:59:59+03:00"
+                ).getOrNull()
+
+                yandexEvents?.forEach { yEvent ->
+                    val yStart = yEvent.start.dateTime.substring(11, 16)
+                    val yEnd = yEvent.end.dateTime.substring(11, 16)
+                    
+                    // Упрощенная проверка пересечения времени
+                    val isTimeConflict = (timeStart < yEnd && timeEnd > yStart)
+                    // ТЗ требует проверку по времени и локации
+                    val isLocationConflict = yEvent.location?.contains(room.name, ignoreCase = true) == true
+                    
+                    if (isTimeConflict && isLocationConflict) {
+                        _uiState.value = UiState.YandexConflictDetected(
+                            yEvent.summary,
+                            "$yStart–$yEnd"
+                        )
+                        return@launch
+                    }
+                }
             }
 
             val event = Event(

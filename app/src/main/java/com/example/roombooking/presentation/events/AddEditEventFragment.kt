@@ -111,10 +111,23 @@ class AddEditEventFragment : Fragment() {
                     is UiState.Success -> findNavController().navigateUp()
                     is UiState.Error -> Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
                     is UiState.ConflictDetected -> showConflict(state.roomName, state.time)
+                    is UiState.YandexConflictDetected -> showYandexConflict(state.summary, state.time)
                     else -> Unit
                 }
             }
         }
+    }
+
+    private fun showYandexConflict(summary: String, time: String) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Конфликт в Яндекс Календаре")
+            .setMessage("В это время у вас уже запланировано событие: «$summary» ($time). Продолжить?")
+            .setPositiveButton("Продолжить") { _, _ ->
+                viewModel.setForceSave(true)
+                save()
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
     }
 
     private fun fillFormFromEvent(rooms: List<Room>) {

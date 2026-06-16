@@ -2,6 +2,8 @@ package com.example.roombooking;
 
 import androidx.hilt.work.HiltWrapper_WorkerFactoryModule;
 import com.example.roombooking.di.DatabaseModule;
+import com.example.roombooking.di.NetworkModule;
+import com.example.roombooking.presentation.MainActivity;
 import com.example.roombooking.presentation.MainActivity_GeneratedInjector;
 import com.example.roombooking.presentation.calendar.CalendarFragment_GeneratedInjector;
 import com.example.roombooking.presentation.calendar.CalendarViewModel_HiltModules;
@@ -147,12 +149,14 @@ public final class RoomBookingApp_HiltComponents {
           DatabaseModule.class,
           HiltWrapper_FragmentGetContextFix_FragmentGetContextFixModule.class,
           HiltWrapper_WorkerFactoryModule.class,
+          NetworkModule.class,
           ActivityRetainedCBuilderModule.class,
           ServiceCBuilderModule.class
       }
   )
   @Singleton
   public abstract static class SingletonC implements RoomBookingApp_GeneratedInjector,
+      MainActivity.MainActivityEntryPoint,
       BootReceiver_GeneratedInjector,
       FragmentGetContextFix.FragmentGetContextFixEntryPoint,
       HiltWrapper_ActivityRetainedComponentManager_ActivityRetainedComponentBuilderEntryPoint,

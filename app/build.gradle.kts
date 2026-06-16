@@ -52,4 +52,8 @@ dependencies {
     implementation(libs.hilt.work)
     kapt(libs.hilt.compiler.work)
     implementation(libs.viewpager2)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp.logging)
+    implementation(libs.androidx.security.crypto)
 }

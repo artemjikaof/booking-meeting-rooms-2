@@ -48,7 +48,7 @@ public final class EventDao_Impl implements EventDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR REPLACE INTO `events` (`id`,`title`,`dateStart`,`dateEnd`,`timeStart`,`timeEnd`,`roomId`,`roomName`,`description`,`participants`,`syncToDeviceCalendar`,`deviceCalendarEventId`,`fromDeviceCalendar`,`lastModifiedInApp`,`lastModifiedInCalendar`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        return "INSERT OR REPLACE INTO `events` (`id`,`title`,`dateStart`,`dateEnd`,`timeStart`,`timeEnd`,`roomId`,`roomName`,`description`,`participants`,`syncToDeviceCalendar`,`deviceCalendarEventId`,`yandexEventId`,`fromDeviceCalendar`,`lastModifiedInApp`,`lastModifiedInCalendar`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -103,13 +103,18 @@ public final class EventDao_Impl implements EventDao {
         } else {
           statement.bindLong(12, entity.getDeviceCalendarEventId());
         }
-        final int _tmp_1 = entity.getFromDeviceCalendar() ? 1 : 0;
-        statement.bindLong(13, _tmp_1);
-        statement.bindLong(14, entity.getLastModifiedInApp());
-        if (entity.getLastModifiedInCalendar() == null) {
-          statement.bindNull(15);
+        if (entity.getYandexEventId() == null) {
+          statement.bindNull(13);
         } else {
-          statement.bindLong(15, entity.getLastModifiedInCalendar());
+          statement.bindString(13, entity.getYandexEventId());
+        }
+        final int _tmp_1 = entity.getFromDeviceCalendar() ? 1 : 0;
+        statement.bindLong(14, _tmp_1);
+        statement.bindLong(15, entity.getLastModifiedInApp());
+        if (entity.getLastModifiedInCalendar() == null) {
+          statement.bindNull(16);
+        } else {
+          statement.bindLong(16, entity.getLastModifiedInCalendar());
         }
       }
     };
@@ -130,7 +135,7 @@ public final class EventDao_Impl implements EventDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "UPDATE OR ABORT `events` SET `id` = ?,`title` = ?,`dateStart` = ?,`dateEnd` = ?,`timeStart` = ?,`timeEnd` = ?,`roomId` = ?,`roomName` = ?,`description` = ?,`participants` = ?,`syncToDeviceCalendar` = ?,`deviceCalendarEventId` = ?,`fromDeviceCalendar` = ?,`lastModifiedInApp` = ?,`lastModifiedInCalendar` = ? WHERE `id` = ?";
+        return "UPDATE OR ABORT `events` SET `id` = ?,`title` = ?,`dateStart` = ?,`dateEnd` = ?,`timeStart` = ?,`timeEnd` = ?,`roomId` = ?,`roomName` = ?,`description` = ?,`participants` = ?,`syncToDeviceCalendar` = ?,`deviceCalendarEventId` = ?,`yandexEventId` = ?,`fromDeviceCalendar` = ?,`lastModifiedInApp` = ?,`lastModifiedInCalendar` = ? WHERE `id` = ?";
       }
 
       @Override
@@ -185,15 +190,20 @@ public final class EventDao_Impl implements EventDao {
         } else {
           statement.bindLong(12, entity.getDeviceCalendarEventId());
         }
-        final int _tmp_1 = entity.getFromDeviceCalendar() ? 1 : 0;
-        statement.bindLong(13, _tmp_1);
-        statement.bindLong(14, entity.getLastModifiedInApp());
-        if (entity.getLastModifiedInCalendar() == null) {
-          statement.bindNull(15);
+        if (entity.getYandexEventId() == null) {
+          statement.bindNull(13);
         } else {
-          statement.bindLong(15, entity.getLastModifiedInCalendar());
+          statement.bindString(13, entity.getYandexEventId());
         }
-        statement.bindLong(16, entity.getId());
+        final int _tmp_1 = entity.getFromDeviceCalendar() ? 1 : 0;
+        statement.bindLong(14, _tmp_1);
+        statement.bindLong(15, entity.getLastModifiedInApp());
+        if (entity.getLastModifiedInCalendar() == null) {
+          statement.bindNull(16);
+        } else {
+          statement.bindLong(16, entity.getLastModifiedInCalendar());
+        }
+        statement.bindLong(17, entity.getId());
       }
     };
     this.__preparedStmtOfDeleteEventById = new SharedSQLiteStatement(__db) {
@@ -307,6 +317,7 @@ public final class EventDao_Impl implements EventDao {
           final int _cursorIndexOfParticipants = CursorUtil.getColumnIndexOrThrow(_cursor, "participants");
           final int _cursorIndexOfSyncToDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "syncToDeviceCalendar");
           final int _cursorIndexOfDeviceCalendarEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "deviceCalendarEventId");
+          final int _cursorIndexOfYandexEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "yandexEventId");
           final int _cursorIndexOfFromDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "fromDeviceCalendar");
           final int _cursorIndexOfLastModifiedInApp = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInApp");
           final int _cursorIndexOfLastModifiedInCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInCalendar");
@@ -375,6 +386,12 @@ public final class EventDao_Impl implements EventDao {
             } else {
               _tmpDeviceCalendarEventId = _cursor.getLong(_cursorIndexOfDeviceCalendarEventId);
             }
+            final String _tmpYandexEventId;
+            if (_cursor.isNull(_cursorIndexOfYandexEventId)) {
+              _tmpYandexEventId = null;
+            } else {
+              _tmpYandexEventId = _cursor.getString(_cursorIndexOfYandexEventId);
+            }
             final boolean _tmpFromDeviceCalendar;
             final int _tmp_1;
             _tmp_1 = _cursor.getInt(_cursorIndexOfFromDeviceCalendar);
@@ -387,7 +404,7 @@ public final class EventDao_Impl implements EventDao {
             } else {
               _tmpLastModifiedInCalendar = _cursor.getLong(_cursorIndexOfLastModifiedInCalendar);
             }
-            _item = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
+            _item = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpYandexEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
             _result.add(_item);
           }
           return _result;
@@ -431,6 +448,7 @@ public final class EventDao_Impl implements EventDao {
           final int _cursorIndexOfParticipants = CursorUtil.getColumnIndexOrThrow(_cursor, "participants");
           final int _cursorIndexOfSyncToDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "syncToDeviceCalendar");
           final int _cursorIndexOfDeviceCalendarEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "deviceCalendarEventId");
+          final int _cursorIndexOfYandexEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "yandexEventId");
           final int _cursorIndexOfFromDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "fromDeviceCalendar");
           final int _cursorIndexOfLastModifiedInApp = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInApp");
           final int _cursorIndexOfLastModifiedInCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInCalendar");
@@ -499,6 +517,12 @@ public final class EventDao_Impl implements EventDao {
             } else {
               _tmpDeviceCalendarEventId = _cursor.getLong(_cursorIndexOfDeviceCalendarEventId);
             }
+            final String _tmpYandexEventId;
+            if (_cursor.isNull(_cursorIndexOfYandexEventId)) {
+              _tmpYandexEventId = null;
+            } else {
+              _tmpYandexEventId = _cursor.getString(_cursorIndexOfYandexEventId);
+            }
             final boolean _tmpFromDeviceCalendar;
             final int _tmp_1;
             _tmp_1 = _cursor.getInt(_cursorIndexOfFromDeviceCalendar);
@@ -511,7 +535,7 @@ public final class EventDao_Impl implements EventDao {
             } else {
               _tmpLastModifiedInCalendar = _cursor.getLong(_cursorIndexOfLastModifiedInCalendar);
             }
-            _item = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
+            _item = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpYandexEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
             _result.add(_item);
           }
           return _result;
@@ -551,6 +575,7 @@ public final class EventDao_Impl implements EventDao {
           final int _cursorIndexOfParticipants = CursorUtil.getColumnIndexOrThrow(_cursor, "participants");
           final int _cursorIndexOfSyncToDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "syncToDeviceCalendar");
           final int _cursorIndexOfDeviceCalendarEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "deviceCalendarEventId");
+          final int _cursorIndexOfYandexEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "yandexEventId");
           final int _cursorIndexOfFromDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "fromDeviceCalendar");
           final int _cursorIndexOfLastModifiedInApp = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInApp");
           final int _cursorIndexOfLastModifiedInCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInCalendar");
@@ -619,6 +644,12 @@ public final class EventDao_Impl implements EventDao {
             } else {
               _tmpDeviceCalendarEventId = _cursor.getLong(_cursorIndexOfDeviceCalendarEventId);
             }
+            final String _tmpYandexEventId;
+            if (_cursor.isNull(_cursorIndexOfYandexEventId)) {
+              _tmpYandexEventId = null;
+            } else {
+              _tmpYandexEventId = _cursor.getString(_cursorIndexOfYandexEventId);
+            }
             final boolean _tmpFromDeviceCalendar;
             final int _tmp_1;
             _tmp_1 = _cursor.getInt(_cursorIndexOfFromDeviceCalendar);
@@ -631,7 +662,7 @@ public final class EventDao_Impl implements EventDao {
             } else {
               _tmpLastModifiedInCalendar = _cursor.getLong(_cursorIndexOfLastModifiedInCalendar);
             }
-            _item = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
+            _item = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpYandexEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
             _result.add(_item);
           }
           return _result;
@@ -675,6 +706,7 @@ public final class EventDao_Impl implements EventDao {
           final int _cursorIndexOfParticipants = CursorUtil.getColumnIndexOrThrow(_cursor, "participants");
           final int _cursorIndexOfSyncToDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "syncToDeviceCalendar");
           final int _cursorIndexOfDeviceCalendarEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "deviceCalendarEventId");
+          final int _cursorIndexOfYandexEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "yandexEventId");
           final int _cursorIndexOfFromDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "fromDeviceCalendar");
           final int _cursorIndexOfLastModifiedInApp = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInApp");
           final int _cursorIndexOfLastModifiedInCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInCalendar");
@@ -743,6 +775,12 @@ public final class EventDao_Impl implements EventDao {
             } else {
               _tmpDeviceCalendarEventId = _cursor.getLong(_cursorIndexOfDeviceCalendarEventId);
             }
+            final String _tmpYandexEventId;
+            if (_cursor.isNull(_cursorIndexOfYandexEventId)) {
+              _tmpYandexEventId = null;
+            } else {
+              _tmpYandexEventId = _cursor.getString(_cursorIndexOfYandexEventId);
+            }
             final boolean _tmpFromDeviceCalendar;
             final int _tmp_1;
             _tmp_1 = _cursor.getInt(_cursorIndexOfFromDeviceCalendar);
@@ -755,7 +793,7 @@ public final class EventDao_Impl implements EventDao {
             } else {
               _tmpLastModifiedInCalendar = _cursor.getLong(_cursorIndexOfLastModifiedInCalendar);
             }
-            _item = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
+            _item = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpYandexEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
             _result.add(_item);
           }
           return _result;
@@ -824,6 +862,7 @@ public final class EventDao_Impl implements EventDao {
           final int _cursorIndexOfParticipants = CursorUtil.getColumnIndexOrThrow(_cursor, "participants");
           final int _cursorIndexOfSyncToDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "syncToDeviceCalendar");
           final int _cursorIndexOfDeviceCalendarEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "deviceCalendarEventId");
+          final int _cursorIndexOfYandexEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "yandexEventId");
           final int _cursorIndexOfFromDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "fromDeviceCalendar");
           final int _cursorIndexOfLastModifiedInApp = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInApp");
           final int _cursorIndexOfLastModifiedInCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInCalendar");
@@ -892,6 +931,12 @@ public final class EventDao_Impl implements EventDao {
             } else {
               _tmpDeviceCalendarEventId = _cursor.getLong(_cursorIndexOfDeviceCalendarEventId);
             }
+            final String _tmpYandexEventId;
+            if (_cursor.isNull(_cursorIndexOfYandexEventId)) {
+              _tmpYandexEventId = null;
+            } else {
+              _tmpYandexEventId = _cursor.getString(_cursorIndexOfYandexEventId);
+            }
             final boolean _tmpFromDeviceCalendar;
             final int _tmp_1;
             _tmp_1 = _cursor.getInt(_cursorIndexOfFromDeviceCalendar);
@@ -904,7 +949,129 @@ public final class EventDao_Impl implements EventDao {
             } else {
               _tmpLastModifiedInCalendar = _cursor.getLong(_cursorIndexOfLastModifiedInCalendar);
             }
-            _item = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
+            _item = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpYandexEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object getAllEventsSync(final Continuation<? super List<EventEntity>> $completion) {
+    final String _sql = "SELECT * FROM events";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<EventEntity>>() {
+      @Override
+      @NonNull
+      public List<EventEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfTitle = CursorUtil.getColumnIndexOrThrow(_cursor, "title");
+          final int _cursorIndexOfDateStart = CursorUtil.getColumnIndexOrThrow(_cursor, "dateStart");
+          final int _cursorIndexOfDateEnd = CursorUtil.getColumnIndexOrThrow(_cursor, "dateEnd");
+          final int _cursorIndexOfTimeStart = CursorUtil.getColumnIndexOrThrow(_cursor, "timeStart");
+          final int _cursorIndexOfTimeEnd = CursorUtil.getColumnIndexOrThrow(_cursor, "timeEnd");
+          final int _cursorIndexOfRoomId = CursorUtil.getColumnIndexOrThrow(_cursor, "roomId");
+          final int _cursorIndexOfRoomName = CursorUtil.getColumnIndexOrThrow(_cursor, "roomName");
+          final int _cursorIndexOfDescription = CursorUtil.getColumnIndexOrThrow(_cursor, "description");
+          final int _cursorIndexOfParticipants = CursorUtil.getColumnIndexOrThrow(_cursor, "participants");
+          final int _cursorIndexOfSyncToDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "syncToDeviceCalendar");
+          final int _cursorIndexOfDeviceCalendarEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "deviceCalendarEventId");
+          final int _cursorIndexOfYandexEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "yandexEventId");
+          final int _cursorIndexOfFromDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "fromDeviceCalendar");
+          final int _cursorIndexOfLastModifiedInApp = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInApp");
+          final int _cursorIndexOfLastModifiedInCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInCalendar");
+          final List<EventEntity> _result = new ArrayList<EventEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final EventEntity _item;
+            final long _tmpId;
+            _tmpId = _cursor.getLong(_cursorIndexOfId);
+            final String _tmpTitle;
+            if (_cursor.isNull(_cursorIndexOfTitle)) {
+              _tmpTitle = null;
+            } else {
+              _tmpTitle = _cursor.getString(_cursorIndexOfTitle);
+            }
+            final String _tmpDateStart;
+            if (_cursor.isNull(_cursorIndexOfDateStart)) {
+              _tmpDateStart = null;
+            } else {
+              _tmpDateStart = _cursor.getString(_cursorIndexOfDateStart);
+            }
+            final String _tmpDateEnd;
+            if (_cursor.isNull(_cursorIndexOfDateEnd)) {
+              _tmpDateEnd = null;
+            } else {
+              _tmpDateEnd = _cursor.getString(_cursorIndexOfDateEnd);
+            }
+            final String _tmpTimeStart;
+            if (_cursor.isNull(_cursorIndexOfTimeStart)) {
+              _tmpTimeStart = null;
+            } else {
+              _tmpTimeStart = _cursor.getString(_cursorIndexOfTimeStart);
+            }
+            final String _tmpTimeEnd;
+            if (_cursor.isNull(_cursorIndexOfTimeEnd)) {
+              _tmpTimeEnd = null;
+            } else {
+              _tmpTimeEnd = _cursor.getString(_cursorIndexOfTimeEnd);
+            }
+            final long _tmpRoomId;
+            _tmpRoomId = _cursor.getLong(_cursorIndexOfRoomId);
+            final String _tmpRoomName;
+            if (_cursor.isNull(_cursorIndexOfRoomName)) {
+              _tmpRoomName = null;
+            } else {
+              _tmpRoomName = _cursor.getString(_cursorIndexOfRoomName);
+            }
+            final String _tmpDescription;
+            if (_cursor.isNull(_cursorIndexOfDescription)) {
+              _tmpDescription = null;
+            } else {
+              _tmpDescription = _cursor.getString(_cursorIndexOfDescription);
+            }
+            final String _tmpParticipants;
+            if (_cursor.isNull(_cursorIndexOfParticipants)) {
+              _tmpParticipants = null;
+            } else {
+              _tmpParticipants = _cursor.getString(_cursorIndexOfParticipants);
+            }
+            final boolean _tmpSyncToDeviceCalendar;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfSyncToDeviceCalendar);
+            _tmpSyncToDeviceCalendar = _tmp != 0;
+            final Long _tmpDeviceCalendarEventId;
+            if (_cursor.isNull(_cursorIndexOfDeviceCalendarEventId)) {
+              _tmpDeviceCalendarEventId = null;
+            } else {
+              _tmpDeviceCalendarEventId = _cursor.getLong(_cursorIndexOfDeviceCalendarEventId);
+            }
+            final String _tmpYandexEventId;
+            if (_cursor.isNull(_cursorIndexOfYandexEventId)) {
+              _tmpYandexEventId = null;
+            } else {
+              _tmpYandexEventId = _cursor.getString(_cursorIndexOfYandexEventId);
+            }
+            final boolean _tmpFromDeviceCalendar;
+            final int _tmp_1;
+            _tmp_1 = _cursor.getInt(_cursorIndexOfFromDeviceCalendar);
+            _tmpFromDeviceCalendar = _tmp_1 != 0;
+            final long _tmpLastModifiedInApp;
+            _tmpLastModifiedInApp = _cursor.getLong(_cursorIndexOfLastModifiedInApp);
+            final Long _tmpLastModifiedInCalendar;
+            if (_cursor.isNull(_cursorIndexOfLastModifiedInCalendar)) {
+              _tmpLastModifiedInCalendar = null;
+            } else {
+              _tmpLastModifiedInCalendar = _cursor.getLong(_cursorIndexOfLastModifiedInCalendar);
+            }
+            _item = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpYandexEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
             _result.add(_item);
           }
           return _result;
@@ -939,6 +1106,7 @@ public final class EventDao_Impl implements EventDao {
           final int _cursorIndexOfParticipants = CursorUtil.getColumnIndexOrThrow(_cursor, "participants");
           final int _cursorIndexOfSyncToDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "syncToDeviceCalendar");
           final int _cursorIndexOfDeviceCalendarEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "deviceCalendarEventId");
+          final int _cursorIndexOfYandexEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "yandexEventId");
           final int _cursorIndexOfFromDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "fromDeviceCalendar");
           final int _cursorIndexOfLastModifiedInApp = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInApp");
           final int _cursorIndexOfLastModifiedInCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInCalendar");
@@ -1007,6 +1175,12 @@ public final class EventDao_Impl implements EventDao {
             } else {
               _tmpDeviceCalendarEventId = _cursor.getLong(_cursorIndexOfDeviceCalendarEventId);
             }
+            final String _tmpYandexEventId;
+            if (_cursor.isNull(_cursorIndexOfYandexEventId)) {
+              _tmpYandexEventId = null;
+            } else {
+              _tmpYandexEventId = _cursor.getString(_cursorIndexOfYandexEventId);
+            }
             final boolean _tmpFromDeviceCalendar;
             final int _tmp_1;
             _tmp_1 = _cursor.getInt(_cursorIndexOfFromDeviceCalendar);
@@ -1019,7 +1193,7 @@ public final class EventDao_Impl implements EventDao {
             } else {
               _tmpLastModifiedInCalendar = _cursor.getLong(_cursorIndexOfLastModifiedInCalendar);
             }
-            _item = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
+            _item = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpYandexEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
             _result.add(_item);
           }
           return _result;
@@ -1057,6 +1231,7 @@ public final class EventDao_Impl implements EventDao {
           final int _cursorIndexOfParticipants = CursorUtil.getColumnIndexOrThrow(_cursor, "participants");
           final int _cursorIndexOfSyncToDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "syncToDeviceCalendar");
           final int _cursorIndexOfDeviceCalendarEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "deviceCalendarEventId");
+          final int _cursorIndexOfYandexEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "yandexEventId");
           final int _cursorIndexOfFromDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "fromDeviceCalendar");
           final int _cursorIndexOfLastModifiedInApp = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInApp");
           final int _cursorIndexOfLastModifiedInCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInCalendar");
@@ -1124,6 +1299,12 @@ public final class EventDao_Impl implements EventDao {
             } else {
               _tmpDeviceCalendarEventId = _cursor.getLong(_cursorIndexOfDeviceCalendarEventId);
             }
+            final String _tmpYandexEventId;
+            if (_cursor.isNull(_cursorIndexOfYandexEventId)) {
+              _tmpYandexEventId = null;
+            } else {
+              _tmpYandexEventId = _cursor.getString(_cursorIndexOfYandexEventId);
+            }
             final boolean _tmpFromDeviceCalendar;
             final int _tmp_1;
             _tmp_1 = _cursor.getInt(_cursorIndexOfFromDeviceCalendar);
@@ -1136,7 +1317,7 @@ public final class EventDao_Impl implements EventDao {
             } else {
               _tmpLastModifiedInCalendar = _cursor.getLong(_cursorIndexOfLastModifiedInCalendar);
             }
-            _result = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
+            _result = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpYandexEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
           } else {
             _result = null;
           }
@@ -1217,6 +1398,7 @@ public final class EventDao_Impl implements EventDao {
           final int _cursorIndexOfParticipants = CursorUtil.getColumnIndexOrThrow(_cursor, "participants");
           final int _cursorIndexOfSyncToDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "syncToDeviceCalendar");
           final int _cursorIndexOfDeviceCalendarEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "deviceCalendarEventId");
+          final int _cursorIndexOfYandexEventId = CursorUtil.getColumnIndexOrThrow(_cursor, "yandexEventId");
           final int _cursorIndexOfFromDeviceCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "fromDeviceCalendar");
           final int _cursorIndexOfLastModifiedInApp = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInApp");
           final int _cursorIndexOfLastModifiedInCalendar = CursorUtil.getColumnIndexOrThrow(_cursor, "lastModifiedInCalendar");
@@ -1284,6 +1466,12 @@ public final class EventDao_Impl implements EventDao {
             } else {
               _tmpDeviceCalendarEventId = _cursor.getLong(_cursorIndexOfDeviceCalendarEventId);
             }
+            final String _tmpYandexEventId;
+            if (_cursor.isNull(_cursorIndexOfYandexEventId)) {
+              _tmpYandexEventId = null;
+            } else {
+              _tmpYandexEventId = _cursor.getString(_cursorIndexOfYandexEventId);
+            }
             final boolean _tmpFromDeviceCalendar;
             final int _tmp_1;
             _tmp_1 = _cursor.getInt(_cursorIndexOfFromDeviceCalendar);
@@ -1296,7 +1484,7 @@ public final class EventDao_Impl implements EventDao {
             } else {
               _tmpLastModifiedInCalendar = _cursor.getLong(_cursorIndexOfLastModifiedInCalendar);
             }
-            _result = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
+            _result = new EventEntity(_tmpId,_tmpTitle,_tmpDateStart,_tmpDateEnd,_tmpTimeStart,_tmpTimeEnd,_tmpRoomId,_tmpRoomName,_tmpDescription,_tmpParticipants,_tmpSyncToDeviceCalendar,_tmpDeviceCalendarEventId,_tmpYandexEventId,_tmpFromDeviceCalendar,_tmpLastModifiedInApp,_tmpLastModifiedInCalendar);
           } else {
             _result = null;
           }

@@ -27,6 +27,7 @@ data class EventEntity(
     val participants: String = "",
     val syncToDeviceCalendar: Boolean = false,
     val deviceCalendarEventId: Long? = null,
+    val yandexEventId: String? = null,
     val fromDeviceCalendar: Boolean = false,
     val lastModifiedInApp: Long = System.currentTimeMillis(),
     val lastModifiedInCalendar: Long? = null

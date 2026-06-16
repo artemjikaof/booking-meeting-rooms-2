@@ -142,6 +142,45 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Яндекс Календарь -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ИНТЕГРАЦИЯ С ЯНДЕКС КАЛЕНДАРЁМ"
+                android:textSize="11sp"
+                android:textColor="?attr/colorPrimary"
+                android:letterSpacing="0.08"
+                android:paddingBottom="8dp" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tv_yandex_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Не подключено"
+                        android:textSize="14sp"
+                        android:textColor="?attr/colorError" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_connect_yandex"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Подключить Яндекс Календарь" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Статус -->
             <TextView
                 android:id="@+id/tv_last_sync"

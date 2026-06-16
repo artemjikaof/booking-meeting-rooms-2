@@ -24,6 +24,9 @@ public final class FragmentSettingsBinding implements ViewBinding {
   private final LinearLayout rootView;
 
   @NonNull
+  public final MaterialButton btnConnectYandex;
+
+  @NonNull
   public final MaterialButton btnSaveFilterTags;
 
   @NonNull
@@ -50,13 +53,18 @@ public final class FragmentSettingsBinding implements ViewBinding {
   @NonNull
   public final TextView tvSyncStatus;
 
+  @NonNull
+  public final TextView tvYandexStatus;
+
   private FragmentSettingsBinding(@NonNull LinearLayout rootView,
-      @NonNull MaterialButton btnSaveFilterTags, @NonNull MaterialButton btnSelectCalendar,
-      @NonNull MaterialButton btnSyncNow, @NonNull TextInputEditText etFilterTags,
-      @NonNull LinearLayout groupSyncSettings, @NonNull SwitchMaterial switchSync,
-      @NonNull MaterialToolbar toolbar, @NonNull TextView tvLastSync,
-      @NonNull TextView tvSyncStatus) {
+      @NonNull MaterialButton btnConnectYandex, @NonNull MaterialButton btnSaveFilterTags,
+      @NonNull MaterialButton btnSelectCalendar, @NonNull MaterialButton btnSyncNow,
+      @NonNull TextInputEditText etFilterTags, @NonNull LinearLayout groupSyncSettings,
+      @NonNull SwitchMaterial switchSync, @NonNull MaterialToolbar toolbar,
+      @NonNull TextView tvLastSync, @NonNull TextView tvSyncStatus,
+      @NonNull TextView tvYandexStatus) {
     this.rootView = rootView;
+    this.btnConnectYandex = btnConnectYandex;
     this.btnSaveFilterTags = btnSaveFilterTags;
     this.btnSelectCalendar = btnSelectCalendar;
     this.btnSyncNow = btnSyncNow;
@@ -66,6 +74,7 @@ public final class FragmentSettingsBinding implements ViewBinding {
     this.toolbar = toolbar;
     this.tvLastSync = tvLastSync;
     this.tvSyncStatus = tvSyncStatus;
+    this.tvYandexStatus = tvYandexStatus;
   }
 
   @Override
@@ -95,6 +104,12 @@ public final class FragmentSettingsBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.btn_connect_yandex;
+      MaterialButton btnConnectYandex = ViewBindings.findChildViewById(rootView, id);
+      if (btnConnectYandex == null) {
+        break missingId;
+      }
+
       id = R.id.btn_save_filter_tags;
       MaterialButton btnSaveFilterTags = ViewBindings.findChildViewById(rootView, id);
       if (btnSaveFilterTags == null) {
@@ -149,9 +164,15 @@ public final class FragmentSettingsBinding implements ViewBinding {
         break missingId;
       }
 
-      return new FragmentSettingsBinding((LinearLayout) rootView, btnSaveFilterTags,
-          btnSelectCalendar, btnSyncNow, etFilterTags, groupSyncSettings, switchSync, toolbar,
-          tvLastSync, tvSyncStatus);
+      id = R.id.tv_yandex_status;
+      TextView tvYandexStatus = ViewBindings.findChildViewById(rootView, id);
+      if (tvYandexStatus == null) {
+        break missingId;
+      }
+
+      return new FragmentSettingsBinding((LinearLayout) rootView, btnConnectYandex,
+          btnSaveFilterTags, btnSelectCalendar, btnSyncNow, etFilterTags, groupSyncSettings,
+          switchSync, toolbar, tvLastSync, tvSyncStatus, tvYandexStatus);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

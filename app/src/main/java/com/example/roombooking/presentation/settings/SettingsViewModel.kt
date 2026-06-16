@@ -22,11 +22,15 @@ class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val syncPrefs: SyncPreferences,
     private val calendarSyncManager: CalendarSyncManager,
-    private val eventRepository: EventRepository
+    private val eventRepository: EventRepository,
+    private val yandexRepository: YandexCalendarRepository
 ) : ViewModel() {
 
     private val _syncEnabled = MutableStateFlow(syncPrefs.syncEnabled)
     val syncEnabled: StateFlow<Boolean> = _syncEnabled.asStateFlow()
+
+    private val _yandexAuthorized = MutableStateFlow(yandexRepository.isAuthorized())
+    val yandexAuthorized: StateFlow<Boolean> = _yandexAuthorized.asStateFlow()
 
     private val _availableCalendars = MutableStateFlow<List<DeviceCalendar>>(emptyList())
     val availableCalendars: StateFlow<List<DeviceCalendar>> = _availableCalendars.asStateFlow()
@@ -88,6 +92,19 @@ class SettingsViewModel @Inject constructor(
 
     fun resolveConflict(conflictData: SyncConflictData) {
         _conflicts.value = _conflicts.value.filter { it.eventId != conflictData.eventId }
+    }
+
+    fun handleYandexAuthCode(code: String) {
+        viewModelScope.launch {
+            _syncStatus.value = "Авторизация в Яндексе..."
+            val result = yandexRepository.handleAuthCode(code)
+            if (result.isSuccess) {
+                _yandexAuthorized.value = true
+                _syncStatus.value = "Яндекс успешно подключен!"
+            } else {
+                _syncStatus.value = "Ошибка авторизации Яндекса"
+            }
+        }
     }
 
     private fun scheduleBackgroundSync() {

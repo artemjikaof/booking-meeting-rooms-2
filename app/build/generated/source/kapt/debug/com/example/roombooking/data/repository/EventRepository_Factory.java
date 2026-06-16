@@ -28,27 +28,33 @@ public final class EventRepository_Factory implements Factory<EventRepository> {
 
   private final Provider<SyncPreferences> prefsProvider;
 
+  private final Provider<YandexCalendarRepository> yandexRepositoryProvider;
+
   public EventRepository_Factory(Provider<EventDao> eventDaoProvider,
       Provider<CalendarSyncManager> calendarSyncManagerProvider,
-      Provider<SyncPreferences> prefsProvider) {
+      Provider<SyncPreferences> prefsProvider,
+      Provider<YandexCalendarRepository> yandexRepositoryProvider) {
     this.eventDaoProvider = eventDaoProvider;
     this.calendarSyncManagerProvider = calendarSyncManagerProvider;
     this.prefsProvider = prefsProvider;
+    this.yandexRepositoryProvider = yandexRepositoryProvider;
   }
 
   @Override
   public EventRepository get() {
-    return newInstance(eventDaoProvider.get(), calendarSyncManagerProvider.get(), prefsProvider.get());
+    return newInstance(eventDaoProvider.get(), calendarSyncManagerProvider.get(), prefsProvider.get(), yandexRepositoryProvider.get());
   }
 
   public static EventRepository_Factory create(Provider<EventDao> eventDaoProvider,
       Provider<CalendarSyncManager> calendarSyncManagerProvider,
-      Provider<SyncPreferences> prefsProvider) {
-    return new EventRepository_Factory(eventDaoProvider, calendarSyncManagerProvider, prefsProvider);
+      Provider<SyncPreferences> prefsProvider,
+      Provider<YandexCalendarRepository> yandexRepositoryProvider) {
+    return new EventRepository_Factory(eventDaoProvider, calendarSyncManagerProvider, prefsProvider, yandexRepositoryProvider);
   }
 
   public static EventRepository newInstance(EventDao eventDao,
-      CalendarSyncManager calendarSyncManager, SyncPreferences prefs) {
-    return new EventRepository(eventDao, calendarSyncManager, prefs);
+      CalendarSyncManager calendarSyncManager, SyncPreferences prefs,
+      YandexCalendarRepository yandexRepository) {
+    return new EventRepository(eventDao, calendarSyncManager, prefs, yandexRepository);
   }
 }

@@ -20,7 +20,9 @@ import dagger.hilt.processor.internal.definecomponent.codegen._dagger_hilt_compo
 import hilt_aggregated_deps._androidx_hilt_work_HiltWrapper_WorkerFactoryModule;
 import hilt_aggregated_deps._com_example_roombooking_RoomBookingApp_GeneratedInjector;
 import hilt_aggregated_deps._com_example_roombooking_di_DatabaseModule;
+import hilt_aggregated_deps._com_example_roombooking_di_NetworkModule;
 import hilt_aggregated_deps._com_example_roombooking_presentation_MainActivity_GeneratedInjector;
+import hilt_aggregated_deps._com_example_roombooking_presentation_MainActivity_MainActivityEntryPoint;
 import hilt_aggregated_deps._com_example_roombooking_presentation_calendar_CalendarFragment_GeneratedInjector;
 import hilt_aggregated_deps._com_example_roombooking_presentation_calendar_CalendarViewModel_HiltModules_BindsModule;
 import hilt_aggregated_deps._com_example_roombooking_presentation_calendar_CalendarViewModel_HiltModules_KeyModule;
@@ -83,7 +85,9 @@ import hilt_aggregated_deps._dagger_hilt_android_internal_modules_HiltWrapper_Ac
         _androidx_hilt_work_HiltWrapper_WorkerFactoryModule.class,
         _com_example_roombooking_RoomBookingApp_GeneratedInjector.class,
         _com_example_roombooking_di_DatabaseModule.class,
+        _com_example_roombooking_di_NetworkModule.class,
         _com_example_roombooking_presentation_MainActivity_GeneratedInjector.class,
+        _com_example_roombooking_presentation_MainActivity_MainActivityEntryPoint.class,
         _com_example_roombooking_presentation_calendar_CalendarFragment_GeneratedInjector.class,
         _com_example_roombooking_presentation_calendar_CalendarViewModel_HiltModules_BindsModule.class,
         _com_example_roombooking_presentation_calendar_CalendarViewModel_HiltModules_KeyModule.class,

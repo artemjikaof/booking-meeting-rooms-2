@@ -117,7 +117,7 @@ public final class RoomDao_Impl implements RoomDao {
   }
 
   @Override
-  public Object insertRoom(final RoomEntity room, final Continuation<? super Long> $completion) {
+  public Object insertRoom(final RoomEntity room, final Continuation<? super Long> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<Long>() {
       @Override
       @NonNull
@@ -131,11 +131,11 @@ public final class RoomDao_Impl implements RoomDao {
           __db.endTransaction();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
-  public Object deleteRoom(final RoomEntity room, final Continuation<? super Unit> $completion) {
+  public Object deleteRoom(final RoomEntity room, final Continuation<? super Unit> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -149,11 +149,11 @@ public final class RoomDao_Impl implements RoomDao {
           __db.endTransaction();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
-  public Object updateRoom(final RoomEntity room, final Continuation<? super Unit> $completion) {
+  public Object updateRoom(final RoomEntity room, final Continuation<? super Unit> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -167,7 +167,7 @@ public final class RoomDao_Impl implements RoomDao {
           __db.endTransaction();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
@@ -227,7 +227,7 @@ public final class RoomDao_Impl implements RoomDao {
   }
 
   @Override
-  public Object getRoomById(final long id, final Continuation<? super RoomEntity> $completion) {
+  public Object getRoomById(final long id, final Continuation<? super RoomEntity> arg1) {
     final String _sql = "SELECT * FROM rooms WHERE id = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -278,7 +278,7 @@ public final class RoomDao_Impl implements RoomDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
@@ -344,8 +344,7 @@ public final class RoomDao_Impl implements RoomDao {
   }
 
   @Override
-  public Object countEventsByRoom(final long roomId,
-      final Continuation<? super Integer> $completion) {
+  public Object countEventsByRoom(final long roomId, final Continuation<? super Integer> arg1) {
     final String _sql = "SELECT COUNT(*) FROM events WHERE roomId = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -375,7 +374,7 @@ public final class RoomDao_Impl implements RoomDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @NonNull
