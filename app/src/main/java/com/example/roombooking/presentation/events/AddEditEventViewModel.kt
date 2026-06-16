@@ -4,11 +4,14 @@ import android.util.Log
 import androidx.lifecycle.*
 import com.example.roombooking.data.repository.EventRepository
 import com.example.roombooking.data.repository.RoomRepository
+import com.example.roombooking.data.repository.YandexCalendarRepository
 import com.example.roombooking.domain.model.Event
 import com.example.roombooking.domain.model.Room
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.ZoneId
 import javax.inject.Inject
 
 sealed class UiState {
@@ -24,7 +27,7 @@ sealed class UiState {
 class AddEditEventViewModel @Inject constructor(
     private val eventRepository: EventRepository,
     private val roomRepository: RoomRepository,
-    private val yandexRepository: com.example.roombooking.data.repository.YandexCalendarRepository
+    private val yandexRepository: YandexCalendarRepository
 ) : ViewModel() {
 
     val rooms: StateFlow<List<Room>> = roomRepository.getAllRooms()
@@ -34,7 +37,6 @@ class AddEditEventViewModel @Inject constructor(
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private var forceSave: Boolean = false
-
     fun setForceSave(value: Boolean) { forceSave = value }
 
     private val _currentEvent = MutableStateFlow<Event?>(null)
@@ -66,8 +68,10 @@ class AddEditEventViewModel @Inject constructor(
             _uiState.value = UiState.Error("Время окончания должно быть позже начала")
             return
         }
+
         viewModelScope.launch {
             _uiState.value = UiState.Loading
+
             val excludeId = _currentEvent.value?.id ?: 0L
             val hasConflict = eventRepository.hasConflict(room.id, dateStart, timeStart, timeEnd, excludeId)
             if (hasConflict) {
@@ -75,26 +79,34 @@ class AddEditEventViewModel @Inject constructor(
                 return@launch
             }
 
-            // Проверка конфликтов в Яндекс Календаре (ТЗ 2.6)
+            // Проверка конфликтов в Яндекс Календаре
+            // ИСПРАВЛЕНО: getYandexEvents() без параметров, фильтруем по дате сами
             if (yandexRepository.isAuthorized() && !forceSave) {
-                val yandexEvents = yandexRepository.getYandexEvents(
-                    from = "${dateStart}T00:00:00+03:00",
-                    to = "${dateStart}T23:59:59+03:00"
-                ).getOrNull()
+                val yandexEvents = yandexRepository.getYandexEvents().getOrNull()
+                val zone = ZoneId.systemDefault()
 
                 yandexEvents?.forEach { yEvent ->
-                    val yStart = yEvent.start.dateTime.substring(11, 16)
-                    val yEnd = yEvent.end.dateTime.substring(11, 16)
-                    
-                    // Упрощенная проверка пересечения времени
-                    val isTimeConflict = (timeStart < yEnd && timeEnd > yStart)
-                    // ТЗ требует проверку по времени и локации
-                    val isLocationConflict = yEvent.location?.contains(room.name, ignoreCase = true) == true
-                    
+                    // ИСПРАВЛЕНО: dtStart/dtEnd — Long миллисекунды, конвертируем в время
+                    val yStartLocal = Instant.ofEpochMilli(yEvent.dtStart)
+                        .atZone(zone).toLocalDateTime()
+                    val yEndLocal = Instant.ofEpochMilli(yEvent.dtEnd)
+                        .atZone(zone).toLocalDateTime()
+
+                    // Фильтруем только события на нужную дату
+                    if (yStartLocal.toLocalDate().toString() != dateStart) return@forEach
+
+                    val yStart = yStartLocal.toLocalTime().toString().substring(0, 5)
+                    val yEnd = yEndLocal.toLocalTime().toString().substring(0, 5)
+
+                    val isTimeConflict = timeStart < yEnd && timeEnd > yStart
+                    // ИСПРАВЛЕНО: data.location (не dto.location)
+                    val isLocationConflict = yEvent.location.contains(room.name, ignoreCase = true)
+
                     if (isTimeConflict && isLocationConflict) {
+                        // ИСПРАВЛЕНО: data.title (не dto.summary)
                         _uiState.value = UiState.YandexConflictDetected(
-                            yEvent.summary,
-                            "$yStart–$yEnd"
+                            summary = yEvent.title,
+                            time = "$yStart–$yEnd"
                         )
                         return@launch
                     }
@@ -123,7 +135,6 @@ class AddEditEventViewModel @Inject constructor(
                 _uiState.value = UiState.Success
             } catch (e: Exception) {
                 Log.e("SaveEvent", "Save failed", e)
-                // Показываем стектрейс в сообщении для отладки
                 val msg = e.cause?.message ?: e.message ?: e.javaClass.simpleName
                 _uiState.value = UiState.Error("Ошибка: $msg")
             }
@@ -133,7 +144,9 @@ class AddEditEventViewModel @Inject constructor(
     fun deleteEvent() {
         val event = _currentEvent.value ?: return
         viewModelScope.launch {
-            try { eventRepository.deleteEvent(event) } catch (e: Exception) {
+            try {
+                eventRepository.deleteEvent(event)
+            } catch (e: Exception) {
                 Log.e("SaveEvent", "Delete failed", e)
             }
             _uiState.value = UiState.Success

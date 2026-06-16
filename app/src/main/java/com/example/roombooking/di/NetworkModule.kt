@@ -50,10 +50,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideYandexAuthApi(): YandexAuthApi {
-        // OAuth API использует другой базовый URL, поэтому создаем отдельный инстанс или используем полный путь в методах
+    fun provideYandexAuthApi(okHttpClient: OkHttpClient): YandexAuthApi {
         return Retrofit.Builder()
             .baseUrl("https://oauth.yandex.ru/")
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(YandexAuthApi::class.java)

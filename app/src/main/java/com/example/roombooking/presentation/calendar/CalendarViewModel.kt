@@ -1,19 +1,23 @@
 package com.example.roombooking.presentation.calendar
 
 import androidx.lifecycle.*
+import com.example.roombooking.data.repository.CalendarEventData
 import com.example.roombooking.data.repository.EventRepository
+import com.example.roombooking.data.repository.YandexCalendarRepository
 import com.example.roombooking.domain.model.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.ZoneId
 import javax.inject.Inject
 
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
-    private val eventRepository: com.example.roombooking.data.repository.EventRepository,
-    private val yandexRepository: com.example.roombooking.data.repository.YandexCalendarRepository
+    private val eventRepository: EventRepository,
+    private val yandexRepository: YandexCalendarRepository
 ) : ViewModel() {
 
     private val _selectedDate = MutableStateFlow(LocalDate.now())
@@ -39,13 +43,13 @@ class CalendarViewModel @Inject constructor(
     private val _viewMode = MutableStateFlow(CalendarViewMode.MONTH)
     val viewMode: StateFlow<CalendarViewMode> = _viewMode.asStateFlow()
 
-    init { 
+    init {
         loadDatesWithEvents()
         loadYandexEvents()
     }
 
-    fun selectDate(date: LocalDate) { 
-        _selectedDate.value = date 
+    fun selectDate(date: LocalDate) {
+        _selectedDate.value = date
         val monthOfDate = YearMonth.from(date)
         if (_currentMonth.value != monthOfDate) {
             _currentMonth.value = monthOfDate
@@ -54,30 +58,43 @@ class CalendarViewModel @Inject constructor(
         }
     }
 
+    // ИСПРАВЛЕНО: getYandexEvents() без параметров, маппим CalendarEventData → Event
     private fun loadYandexEvents() {
         if (!yandexRepository.isAuthorized()) return
         viewModelScope.launch {
-            val month = _currentMonth.value
-            val result = yandexRepository.getYandexEvents(
-                from = "${month.atDay(1)}T00:00:00+03:00",
-                to = "${month.atEndOfMonth()}T23:59:59+03:00"
-            )
-            result.onSuccess { yandexList ->
-                _yandexEvents.value = yandexList.map { dto ->
-                    // Маппим DTO Яндекса в нашу доменную модель Event (ТЗ 2.5)
-                    Event(
-                        title = "[Яндекс] ${dto.summary}",
-                        dateStart = dto.start.dateTime.substring(0, 10),
-                        dateEnd = dto.end.dateTime.substring(0, 10),
-                        timeStart = dto.start.dateTime.substring(11, 16),
-                        timeEnd = dto.end.dateTime.substring(11, 16),
-                        roomId = -1, // Специальный ID для внешних событий
-                        roomName = dto.location ?: "Яндекс Календарь",
-                        description = dto.description ?: "",
-                        fromDeviceCalendar = true // Используем этот флаг для индикации внешнего источника
-                    )
+            val result = yandexRepository.getYandexEvents()
+            result.onSuccess { calendarEvents ->
+                val zone = ZoneId.systemDefault()
+                _yandexEvents.value = calendarEvents.mapNotNull { event ->
+                    calendarEventDataToEvent(event, zone)
                 }
+            }.onFailure { e ->
+                android.util.Log.e("CalendarVM", "Failed to load Yandex events", e)
             }
+        }
+    }
+
+    // Конвертация CalendarEventData (dtStart/dtEnd в мс) → доменный Event
+    private fun calendarEventDataToEvent(data: CalendarEventData, zone: ZoneId): Event? {
+        return try {
+            val startLocal = Instant.ofEpochMilli(data.dtStart).atZone(zone).toLocalDateTime()
+            val endLocal = Instant.ofEpochMilli(data.dtEnd).atZone(zone).toLocalDateTime()
+            Event(
+                // ИСПРАВЛЕНО: data.title (не dto.summary)
+                title = "[Яндекс] ${data.title}",
+                // ИСПРАВЛЕНО: из миллисекунд, а не dto.start.dateTime
+                dateStart = startLocal.toLocalDate().toString(),
+                dateEnd = endLocal.toLocalDate().toString(),
+                timeStart = startLocal.toLocalTime().toString().substring(0, 5),
+                timeEnd = endLocal.toLocalTime().toString().substring(0, 5),
+                roomId = -1,
+                roomName = data.location.ifBlank { "Яндекс Календарь" },
+                description = data.description,
+                fromDeviceCalendar = true
+            )
+        } catch (e: Exception) {
+            android.util.Log.w("CalendarVM", "Failed to map Yandex event: ${data.title}", e)
+            null
         }
     }
 
@@ -132,10 +149,9 @@ class CalendarViewModel @Inject constructor(
         }
     }
 
-    fun setViewMode(mode: CalendarViewMode) { 
-        _viewMode.value = mode 
+    fun setViewMode(mode: CalendarViewMode) {
+        _viewMode.value = mode
         if (mode == CalendarViewMode.WEEK || mode == CalendarViewMode.DAY) {
-            // Убеждаемся, что текущий месяц соответствует выбранной дате
             _currentMonth.value = YearMonth.from(_selectedDate.value)
         }
     }

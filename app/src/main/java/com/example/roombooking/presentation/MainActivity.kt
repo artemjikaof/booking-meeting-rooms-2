@@ -3,6 +3,7 @@ package com.example.roombooking.presentation
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -51,20 +52,45 @@ class MainActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+        setIntent(intent) // ВАЖНО: обновляем текущий intent
         intent?.let { handleYandexAuthIntent(it) }
     }
 
     private fun handleYandexAuthIntent(intent: Intent) {
-        val data = intent.data
-        if (data != null && data.scheme == "roombooking" && data.host == "yandex-auth") {
-            val code = data.getQueryParameter("code")
-            if (code != null) {
+        val data = intent.data ?: return
+        if (data.scheme != "roombooking" || data.host != "yandex-auth") return
+
+        val code = data.getQueryParameter("code")
+        val error = data.getQueryParameter("error")
+
+        when {
+            error != null -> {
+                Toast.makeText(this, "Ошибка авторизации Яндекс: $error", Toast.LENGTH_LONG).show()
+            }
+            code != null -> {
                 lifecycleScope.launch {
                     val repository = EntryPointAccessors.fromApplication(
                         applicationContext,
                         MainActivityEntryPoint::class.java
                     ).yandexRepository()
-                    repository.handleAuthCode(code)
+
+                    val result = repository.handleAuthCode(code)
+
+                    if (result.isSuccess) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Яндекс Календарь подключён ✓",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        // Переходим в настройки чтобы ViewModel обновила статус
+                        navController.navigate(R.id.settingsFragment)
+                    } else {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Ошибка подключения: ${result.exceptionOrNull()?.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
             }
         }

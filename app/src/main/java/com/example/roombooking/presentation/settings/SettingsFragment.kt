@@ -47,6 +47,13 @@ class SettingsFragment : Fragment() {
         observeViewModel()
     }
 
+    // ИСПРАВЛЕНО: обновляем статус Яндекс при каждом возврате на экран
+    // (авторизация происходит в браузере → MainActivity → сюда)
+    override fun onResume() {
+        super.onResume()
+        viewModel.refreshYandexStatus()
+    }
+
     private fun setupViews() {
         binding.switchSync.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked && !viewModel.hasCalendarPermission) {
@@ -66,7 +73,9 @@ class SettingsFragment : Fragment() {
             }
         }
 
-        binding.btnSyncNow.setOnClickListener { viewModel.syncNow() }
+        binding.btnSyncNow.setOnClickListener {
+            viewModel.syncNow()
+        }
 
         binding.btnConnectYandex.setOnClickListener {
             val intent = android.content.Intent(
@@ -87,12 +96,13 @@ class SettingsFragment : Fragment() {
             viewModel.yandexAuthorized.collect { authorized ->
                 binding.tvYandexStatus.text = if (authorized) "Подключено ✓" else "Не подключено"
                 binding.tvYandexStatus.setTextColor(
-                    if (authorized) 
+                    if (authorized)
                         androidx.core.content.ContextCompat.getColor(requireContext(), android.R.color.holo_green_dark)
-                    else 
+                    else
                         androidx.core.content.ContextCompat.getColor(requireContext(), android.R.color.holo_red_dark)
                 )
-                binding.btnConnectYandex.text = if (authorized) "Переподключить" else "Подключить Яндекс Календарь"
+                binding.btnConnectYandex.text =
+                    if (authorized) "Переподключить" else "Подключить Яндекс Календарь"
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
@@ -127,9 +137,7 @@ class SettingsFragment : Fragment() {
     private fun showPermissionRationale() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Доступ к календарю")
-            .setMessage(
-                "Приложению нужен доступ к вашему календарю для синхронизации мероприятий."
-            )
+            .setMessage("Приложению нужен доступ к вашему календарю для синхронизации мероприятий.")
             .setPositiveButton("Разрешить") { _, _ ->
                 calendarPermissionLauncher.launch(
                     arrayOf(
@@ -161,12 +169,8 @@ class SettingsFragment : Fragment() {
             .setMessage(
                 "«${conflict.appVersion.title}» изменено и в приложении, и в системном календаре. Какую версию сохранить?"
             )
-            .setPositiveButton("Из приложения") { _, _ ->
-                viewModel.resolveConflict(conflict)
-            }
-            .setNeutralButton("Из календаря") { _, _ ->
-                viewModel.resolveConflict(conflict)
-            }
+            .setPositiveButton("Из приложения") { _, _ -> viewModel.resolveConflict(conflict) }
+            .setNeutralButton("Из календаря") { _, _ -> viewModel.resolveConflict(conflict) }
             .setNegativeButton("Позже", null)
             .show()
     }
