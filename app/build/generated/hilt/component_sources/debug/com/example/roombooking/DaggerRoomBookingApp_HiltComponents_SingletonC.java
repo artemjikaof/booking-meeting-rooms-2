@@ -649,11 +649,11 @@ public final class DaggerRoomBookingApp_HiltComponents_SingletonC {
 
     private Provider<SyncPreferences> syncPreferencesProvider;
 
-    private Provider<YandexAuthApi> provideYandexAuthApiProvider;
-
     private Provider<HttpLoggingInterceptor> provideLoggingInterceptorProvider;
 
     private Provider<OkHttpClient> provideOkHttpClientProvider;
+
+    private Provider<YandexAuthApi> provideYandexAuthApiProvider;
 
     private Provider<Retrofit> provideRetrofitProvider;
 
@@ -697,11 +697,11 @@ public final class DaggerRoomBookingApp_HiltComponents_SingletonC {
       this.provideDatabaseProvider = DoubleCheck.provider(new SwitchingProvider<AppDatabase>(singletonCImpl, 2));
       this.calendarSyncManagerProvider = DoubleCheck.provider(new SwitchingProvider<CalendarSyncManager>(singletonCImpl, 3));
       this.syncPreferencesProvider = DoubleCheck.provider(new SwitchingProvider<SyncPreferences>(singletonCImpl, 4));
+      this.provideLoggingInterceptorProvider = DoubleCheck.provider(new SwitchingProvider<HttpLoggingInterceptor>(singletonCImpl, 8));
+      this.provideOkHttpClientProvider = DoubleCheck.provider(new SwitchingProvider<OkHttpClient>(singletonCImpl, 7));
       this.provideYandexAuthApiProvider = DoubleCheck.provider(new SwitchingProvider<YandexAuthApi>(singletonCImpl, 6));
-      this.provideLoggingInterceptorProvider = DoubleCheck.provider(new SwitchingProvider<HttpLoggingInterceptor>(singletonCImpl, 10));
-      this.provideOkHttpClientProvider = DoubleCheck.provider(new SwitchingProvider<OkHttpClient>(singletonCImpl, 9));
-      this.provideRetrofitProvider = DoubleCheck.provider(new SwitchingProvider<Retrofit>(singletonCImpl, 8));
-      this.provideYandexCalendarApiProvider = DoubleCheck.provider(new SwitchingProvider<YandexCalendarApi>(singletonCImpl, 7));
+      this.provideRetrofitProvider = DoubleCheck.provider(new SwitchingProvider<Retrofit>(singletonCImpl, 10));
+      this.provideYandexCalendarApiProvider = DoubleCheck.provider(new SwitchingProvider<YandexCalendarApi>(singletonCImpl, 9));
       this.tokenManagerProvider = DoubleCheck.provider(new SwitchingProvider<TokenManager>(singletonCImpl, 11));
       this.yandexCalendarRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<YandexCalendarRepository>(singletonCImpl, 5));
       this.eventRepositoryProvider = DoubleCheck.provider(new SwitchingProvider<EventRepository>(singletonCImpl, 1));
@@ -786,22 +786,22 @@ public final class DaggerRoomBookingApp_HiltComponents_SingletonC {
           return (T) new SyncPreferences(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           case 5: // com.example.roombooking.data.repository.YandexCalendarRepository 
-          return (T) new YandexCalendarRepository(singletonCImpl.provideYandexAuthApiProvider.get(), singletonCImpl.provideYandexCalendarApiProvider.get(), singletonCImpl.tokenManagerProvider.get());
+          return (T) new YandexCalendarRepository(singletonCImpl.provideYandexAuthApiProvider.get(), singletonCImpl.provideYandexCalendarApiProvider.get(), singletonCImpl.tokenManagerProvider.get(), singletonCImpl.syncPreferencesProvider.get(), singletonCImpl.provideOkHttpClientProvider.get());
 
           case 6: // com.example.roombooking.data.remote.YandexAuthApi 
-          return (T) NetworkModule_ProvideYandexAuthApiFactory.provideYandexAuthApi();
+          return (T) NetworkModule_ProvideYandexAuthApiFactory.provideYandexAuthApi(singletonCImpl.provideOkHttpClientProvider.get());
 
-          case 7: // com.example.roombooking.data.remote.YandexCalendarApi 
-          return (T) NetworkModule_ProvideYandexCalendarApiFactory.provideYandexCalendarApi(singletonCImpl.provideRetrofitProvider.get());
-
-          case 8: // retrofit2.Retrofit 
-          return (T) NetworkModule_ProvideRetrofitFactory.provideRetrofit(singletonCImpl.provideOkHttpClientProvider.get());
-
-          case 9: // okhttp3.OkHttpClient 
+          case 7: // okhttp3.OkHttpClient 
           return (T) NetworkModule_ProvideOkHttpClientFactory.provideOkHttpClient(singletonCImpl.provideLoggingInterceptorProvider.get());
 
-          case 10: // okhttp3.logging.HttpLoggingInterceptor 
+          case 8: // okhttp3.logging.HttpLoggingInterceptor 
           return (T) NetworkModule_ProvideLoggingInterceptorFactory.provideLoggingInterceptor();
+
+          case 9: // com.example.roombooking.data.remote.YandexCalendarApi 
+          return (T) NetworkModule_ProvideYandexCalendarApiFactory.provideYandexCalendarApi(singletonCImpl.provideRetrofitProvider.get());
+
+          case 10: // retrofit2.Retrofit 
+          return (T) NetworkModule_ProvideRetrofitFactory.provideRetrofit(singletonCImpl.provideOkHttpClientProvider.get());
 
           case 11: // com.example.roombooking.data.local.TokenManager 
           return (T) new TokenManager(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));

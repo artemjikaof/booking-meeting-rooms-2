@@ -78,6 +78,7 @@ class SettingsFragment : Fragment() {
         }
 
         binding.btnConnectYandex.setOnClickListener {
+            viewModel.clearYandexAuth()  // сначала чистим
             val intent = android.content.Intent(
                 android.content.Intent.ACTION_VIEW,
                 android.net.Uri.parse(com.example.roombooking.util.YandexConfig.getAuthUrl())

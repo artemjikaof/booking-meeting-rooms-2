@@ -4,13 +4,15 @@ import com.google.gson.annotations.SerializedName
 import retrofit2.http.*
 
 interface YandexAuthApi {
+
     @FormUrlEncoded
     @POST("https://oauth.yandex.ru/token")
     suspend fun getTokens(
-        @Field("grant_type") grantType: String = "authorization_code",
+        @Field("grant_type") grantType: String,  // убрать default value
         @Field("code") code: String,
         @Field("client_id") clientId: String,
-        @Field("client_secret") clientSecret: String
+        @Field("client_secret") clientSecret: String,
+        @Field("redirect_uri") redirectUri: String   // добавить redirect_uri
     ): TokenResponse
 
     @GET("https://login.yandex.ru/info?format=json")
@@ -21,7 +23,7 @@ interface YandexAuthApi {
     @FormUrlEncoded
     @POST("https://oauth.yandex.ru/token")
     suspend fun refreshToken(
-        @Field("grant_type") grantType: String = "refresh_token",
+        @Field("grant_type") grantType: String,  // убрать default value
         @Field("refresh_token") refreshToken: String,
         @Field("client_id") clientId: String,
         @Field("client_secret") clientSecret: String

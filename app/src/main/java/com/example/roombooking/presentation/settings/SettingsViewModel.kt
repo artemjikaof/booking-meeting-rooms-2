@@ -122,6 +122,11 @@ class SettingsViewModel @Inject constructor(
         _conflicts.value = _conflicts.value.filter { it.eventId != conflictData.eventId }
     }
 
+    fun clearYandexAuth() {
+        yandexRepository.clearAuth()
+        _yandexAuthorized.value = false
+    }
+
     private fun scheduleBackgroundSync() {
         val request = PeriodicWorkRequestBuilder<CalendarSyncWorker>(4, TimeUnit.HOURS)
             .setConstraints(

@@ -18,7 +18,7 @@ class SyncPreferences @Inject constructor(
     var selectedCalendarId: Long?
         get() = if (prefs.contains("calendar_id")) prefs.getLong("calendar_id", -1) else null
         set(value) = if (value != null) prefs.edit().putLong("calendar_id", value).apply()
-                     else prefs.edit().remove("calendar_id").apply()
+        else prefs.edit().remove("calendar_id").apply()
 
     var filterTags: List<String>
         get() = prefs.getString("filter_tags", "#Бронирование,#Помещение")
@@ -36,4 +36,14 @@ class SyncPreferences @Inject constructor(
     var backgroundSyncIntervalHours: Int
         get() = prefs.getInt("bg_sync_interval", 4)
         set(value) = prefs.edit().putInt("bg_sync_interval", value).apply()
+
+    // Пароль приложения Яндекс для CalDAV (Basic Auth)
+    var yandexAppPassword: String?
+        get() = prefs.getString("yandex_app_password", null)
+        set(value) = prefs.edit().putString("yandex_app_password", value).apply()
+
+    // Логин Яндекс (кешируем чтобы не зависеть от TokenManager)
+    var yandexLogin: String?
+        get() = prefs.getString("yandex_login", null)
+        set(value) = prefs.edit().putString("yandex_login", value).apply()
 }
