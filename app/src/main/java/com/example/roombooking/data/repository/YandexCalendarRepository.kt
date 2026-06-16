@@ -9,6 +9,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.HttpException
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -36,7 +37,7 @@ class YandexCalendarRepository @Inject constructor(
                 clientSecret = YandexConfig.CLIENT_SECRET,
                 redirectUri = YandexConfig.REDIRECT_URI
             )
-            tokenManager.saveTokens(response.accessToken, response.refreshToken)
+            tokenManager.saveTokens(response.accessToken, response.refreshToken, response.expiresIn)
             ensureLogin(response.accessToken)
             Result.success(Unit)
         } catch (e: Exception) {
@@ -45,11 +46,11 @@ class YandexCalendarRepository @Inject constructor(
         }
     }
 
+    // ИСПРАВЛЕНО: проверяем только логин + accessToken (не требуем пароль приложения)
     fun isAuthorized(): Boolean {
-        // Авторизован если есть логин И пароль приложения
         val login = syncPrefs.yandexLogin ?: tokenManager.getUserLogin()
-        val password = syncPrefs.yandexAppPassword
-        return login != null && password != null
+        val token = tokenManager.getAccessToken()
+        return login != null && token != null
     }
 
     fun clearAuth() {
@@ -58,37 +59,84 @@ class YandexCalendarRepository @Inject constructor(
         syncPrefs.yandexLogin = null
     }
 
-    // Сохраняем логин и в SyncPrefs тоже — для CalDAV без токена
     private suspend fun ensureLogin(token: String): Pair<String, String> {
         val login = tokenManager.getUserLogin()
         val userId = tokenManager.getUserId()
         if (login != null && userId != null) {
-            syncPrefs.yandexLogin = login  // синхронизируем в SyncPrefs
+            syncPrefs.yandexLogin = login
             return login to userId
         }
 
         val info = authApi.getUserInfo("OAuth $token")
-        val fullLogin = if (info.login.contains("@")) info.login else "${info.login}@yandex.ru"
+        // CalDAV часто требует именно email или первичный логин. 
+        // Если есть default_email, используем его, иначе login.
+        val baseLogin = info.email ?: info.login
+        val fullLogin = if (baseLogin.contains("@")) baseLogin else "$baseLogin@yandex.ru"
+
         tokenManager.saveUserLogin(fullLogin, info.id)
-        syncPrefs.yandexLogin = fullLogin  // сохраняем в SyncPrefs для CalDAV
+        syncPrefs.yandexLogin = fullLogin
         android.util.Log.d("YandexRepo", "User login: $fullLogin, id: ${info.id}")
         return fullLogin to info.id
     }
 
-    // Вызывается из SettingsViewModel когда пользователь вводит пароль приложения
     fun saveAppPassword(password: String) {
         syncPrefs.yandexAppPassword = password
         android.util.Log.d("YandexRepo", "App password saved")
     }
 
-    // ─── Basic Auth header ────────────────────────────────────────────────
+    private suspend fun refreshToken(): Boolean {
+        val refreshToken = tokenManager.getRefreshToken() ?: return false
+        return try {
+            val response = authApi.refreshToken(
+                grantType = "refresh_token",
+                refreshToken = refreshToken,
+                clientId = YandexConfig.CLIENT_ID,
+                clientSecret = YandexConfig.CLIENT_SECRET
+            )
+            tokenManager.saveTokens(response.accessToken, response.refreshToken, response.expiresIn)
+            android.util.Log.i("YandexRepo", "Token refreshed successfully")
+            true
+        } catch (e: Exception) {
+            android.util.Log.e("YandexRepo", "Token refresh failed", e)
+            if (e is HttpException && (e.code() == 400 || e.code() == 401)) {
+                android.util.Log.w("YandexRepo", "Refresh token invalid, clearing auth")
+                clearAuth()
+            }
+            false
+        }
+    }
 
-    private fun basicAuthHeader(login: String, password: String): String {
-        val credentials = Base64.encodeToString(
-            "$login:$password".toByteArray(Charsets.UTF_8),
-            Base64.NO_WRAP
-        )
-        return "Basic $credentials"
+    // ─── ИСПРАВЛЕНО: используем OAuth токен вместо Basic Auth ─────────────
+
+    private fun authHeader(): String {
+        val token = tokenManager.getAccessToken()
+            ?: throw Exception("Нет токена авторизации")
+        return "OAuth $token"
+    }
+
+    private suspend fun executeWithRefresh(requestBuilder: Request.Builder): okhttp3.Response {
+        // Проверяем срок действия перед запросом
+        if (tokenManager.isTokenExpired()) {
+            refreshToken()
+        }
+
+        val request = requestBuilder
+            .header("Authorization", authHeader())
+            .build()
+
+        val response = httpClient.newCall(request).execute()
+
+        if (response.code == 401) {
+            android.util.Log.w("YandexRepo", "401 Unauthorized, attempting token refresh...")
+            if (refreshToken()) {
+                response.close()
+                val retryRequest = requestBuilder
+                    .header("Authorization", authHeader())
+                    .build()
+                return httpClient.newCall(retryRequest).execute()
+            }
+        }
+        return response
     }
 
     // ─── Чтение событий из Яндекс Календаря ───────────────────────────────
@@ -96,12 +144,15 @@ class YandexCalendarRepository @Inject constructor(
     suspend fun getYandexEvents(): Result<List<CalendarEventData>> {
         val login = syncPrefs.yandexLogin ?: tokenManager.getUserLogin()
         ?: return Result.failure(Exception("Не авторизован"))
-        val appPassword = syncPrefs.yandexAppPassword
-            ?: return Result.failure(Exception("Пароль приложения не задан"))
+
+        // Проверяем что токен есть
+        tokenManager.getAccessToken()
+            ?: return Result.failure(Exception("Нет токена авторизации"))
 
         return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             try {
                 val url = "https://caldav.yandex.ru/calendars/$login/events-default/"
+                android.util.Log.d("YandexRepo", "Fetching events from: $url")
 
                 val reportXml = """<?xml version="1.0" encoding="UTF-8"?>
 <C:calendar-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
@@ -116,25 +167,23 @@ class YandexCalendarRepository @Inject constructor(
   </C:filter>
 </C:calendar-query>"""
 
-                val request = Request.Builder()
+                val requestBuilder = Request.Builder()
                     .url(url)
                     .method("REPORT", reportXml.toRequestBody("application/xml; charset=utf-8".toMediaTypeOrNull()))
-                    .header("Authorization", basicAuthHeader(login, appPassword))
                     .header("Depth", "1")
-                    .build()
 
-                val response = httpClient.newCall(request).execute()
+                val response = executeWithRefresh(requestBuilder)
                 val responseCode = response.code
                 val body = response.use { it.body?.string() ?: "" }
 
-                android.util.Log.d("YandexRepo", "CalDAV REPORT $responseCode, body length: ${body.length}")
+                android.util.Log.d("YandexRepo", "CalDAV REPORT response code: $responseCode")
 
                 if (responseCode in 200..299) {
                     val events = parseCalDavResponse(body)
                     android.util.Log.i("YandexRepo", "Fetched ${events.size} events from Yandex")
                     Result.success(events)
                 } else {
-                    android.util.Log.e("YandexRepo", "CalDAV REPORT failed $responseCode: $body")
+                    android.util.Log.e("YandexRepo", "CalDAV REPORT failed $responseCode. Body: $body")
                     Result.failure(Exception("CalDAV REPORT failed: $responseCode"))
                 }
             } catch (e: Exception) {
@@ -156,8 +205,9 @@ class YandexCalendarRepository @Inject constructor(
     ): Result<String> {
         val login = syncPrefs.yandexLogin ?: tokenManager.getUserLogin()
         ?: return Result.failure(Exception("Не авторизован"))
-        val appPassword = syncPrefs.yandexAppPassword
-            ?: return Result.failure(Exception("Пароль приложения не задан"))
+
+        tokenManager.getAccessToken()
+            ?: return Result.failure(Exception("Нет токена авторизации"))
 
         return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             try {
@@ -166,13 +216,11 @@ class YandexCalendarRepository @Inject constructor(
 
                 val ics = generateIcs(summary, description, start, end, location, externalId)
 
-                val request = Request.Builder()
+                val requestBuilder = Request.Builder()
                     .url(url)
                     .put(ics.toRequestBody("text/calendar; charset=utf-8".toMediaTypeOrNull()))
-                    .header("Authorization", basicAuthHeader(login, appPassword))
-                    .build()
 
-                val response = httpClient.newCall(request).execute()
+                val response = executeWithRefresh(requestBuilder)
                 val responseCode = response.code
                 response.body?.close()
 
@@ -204,19 +252,18 @@ class YandexCalendarRepository @Inject constructor(
     suspend fun deleteYandexEvent(yandexEventId: String): Result<Unit> {
         val login = syncPrefs.yandexLogin ?: tokenManager.getUserLogin()
         ?: return Result.failure(Exception("Не авторизован"))
-        val appPassword = syncPrefs.yandexAppPassword
-            ?: return Result.failure(Exception("Пароль приложения не задан"))
+
+        tokenManager.getAccessToken()
+            ?: return Result.failure(Exception("Нет токена авторизации"))
 
         return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             try {
                 val url = "https://caldav.yandex.ru/calendars/$login/events-default/$yandexEventId.ics"
-                val request = Request.Builder()
+                val requestBuilder = Request.Builder()
                     .url(url)
                     .delete()
-                    .header("Authorization", basicAuthHeader(login, appPassword))
-                    .build()
 
-                val response = httpClient.newCall(request).execute()
+                val response = executeWithRefresh(requestBuilder)
                 val responseCode = response.code
                 response.body?.close()
 

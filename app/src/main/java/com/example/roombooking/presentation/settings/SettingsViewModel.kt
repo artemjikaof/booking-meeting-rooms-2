@@ -30,7 +30,6 @@ class SettingsViewModel @Inject constructor(
     private val _syncEnabled = MutableStateFlow(syncPrefs.syncEnabled)
     val syncEnabled: StateFlow<Boolean> = _syncEnabled.asStateFlow()
 
-    // ИСПРАВЛЕНО: refreshYandexStatus() вызывается при старте и после навигации сюда
     private val _yandexAuthorized = MutableStateFlow(yandexRepository.isAuthorized())
     val yandexAuthorized: StateFlow<Boolean> = _yandexAuthorized.asStateFlow()
 
@@ -58,8 +57,7 @@ class SettingsViewModel @Inject constructor(
                 ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_CALENDAR) ==
                 PackageManager.PERMISSION_GRANTED
 
-    // Вызывается из onResume() фрагмента — обновляет статус авторизации
-    // (нужно т.к. авторизация происходит в MainActivity, а не во фрагменте)
+    // Вызывается из onResume() фрагмента
     fun refreshYandexStatus() {
         _yandexAuthorized.value = yandexRepository.isAuthorized()
     }
@@ -84,6 +82,8 @@ class SettingsViewModel @Inject constructor(
         _filterTags.value = tags
     }
 
+    // ИСПРАВЛЕНО: убран дублирующий вызов getYandexEvents() —
+    // syncWithDeviceCalendar() уже синхронизирует Яндекс внутри себя
     fun syncNow() {
         if (!hasCalendarPermission) {
             _syncStatus.value = "Нет разрешения на доступ к календарю"
@@ -92,27 +92,13 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _syncStatus.value = "Синхронизация..."
             try {
-                // Синхронизация с локальным Calendar Provider
                 val conflicts = eventRepository.syncWithDeviceCalendar()
                 _conflicts.value = conflicts
-
-                // Если авторизованы в Яндексе — дополнительно синхронизируем с облаком
-                if (yandexRepository.isAuthorized()) {
-                    val yandexResult = yandexRepository.getYandexEvents()
-                    yandexResult.onSuccess { events ->
-                        android.util.Log.d("SettingsVM", "Got ${events.size} events from Yandex")
-                        // TODO: смерджить events с локальной БД через eventRepository
-                    }.onFailure { e ->
-                        android.util.Log.e("SettingsVM", "Yandex sync failed", e)
-                        _syncStatus.value = "Ошибка Яндекс: ${e.message}"
-                        return@launch
-                    }
-                }
-
                 _lastSyncTime.value = syncPrefs.lastSyncTime
                 _syncStatus.value = if (conflicts.isEmpty()) "Синхронизировано ✓"
                 else "Найдено ${conflicts.size} конфликт(ов)"
             } catch (e: Exception) {
+                android.util.Log.e("SettingsVM", "Sync failed", e)
                 _syncStatus.value = "Ошибка: ${e.message}"
             }
         }

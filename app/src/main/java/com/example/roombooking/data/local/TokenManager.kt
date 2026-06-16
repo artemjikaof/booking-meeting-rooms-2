@@ -23,10 +23,13 @@ class TokenManager @Inject constructor(
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
 
-    fun saveTokens(accessToken: String, refreshToken: String?) {
+    fun saveTokens(accessToken: String, refreshToken: String?, expiresIn: Int = 0) {
         prefs.edit().apply {
             putString(KEY_ACCESS_TOKEN, accessToken)
             refreshToken?.let { putString(KEY_REFRESH_TOKEN, it) }
+            if (expiresIn > 0) {
+                putLong(KEY_EXPIRES_AT, System.currentTimeMillis() + expiresIn * 1000L)
+            }
             apply()
         }
     }
@@ -43,6 +46,11 @@ class TokenManager @Inject constructor(
 
     fun getRefreshToken(): String? = prefs.getString(KEY_REFRESH_TOKEN, null)
 
+    fun isTokenExpired(): Boolean {
+        val expiresAt = prefs.getLong(KEY_EXPIRES_AT, 0)
+        return expiresAt > 0 && System.currentTimeMillis() > (expiresAt - 60000) // 1 min margin
+    }
+
     fun clearTokens() {
         prefs.edit().clear().apply()
     }
@@ -50,5 +58,6 @@ class TokenManager @Inject constructor(
     companion object {
         private const val KEY_ACCESS_TOKEN = "access_token"
         private const val KEY_REFRESH_TOKEN = "refresh_token"
+        private const val KEY_EXPIRES_AT = "expires_at"
     }
 }

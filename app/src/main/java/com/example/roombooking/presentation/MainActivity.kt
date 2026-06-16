@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        setIntent(intent) // ВАЖНО: обновляем текущий intent
+        setIntent(intent)
         intent?.let { handleYandexAuthIntent(it) }
     }
 
@@ -82,7 +82,8 @@ class MainActivity : AppCompatActivity() {
                             "Яндекс Календарь подключён ✓",
                             Toast.LENGTH_SHORT
                         ).show()
-                        // Переходим в настройки чтобы ViewModel обновила статус
+                        // ИСПРАВЛЕНО: navigateUp() + navigate() чтобы SettingsFragment
+                        // пересоздался и onResume() вызвал refreshYandexStatus()
                         navController.navigate(R.id.settingsFragment)
                     } else {
                         Toast.makeText(

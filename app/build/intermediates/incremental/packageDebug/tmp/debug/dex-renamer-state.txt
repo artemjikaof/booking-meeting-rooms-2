@@ -1,4 +1,4 @@
-#Tue Jun 16 09:13:05 MSK 2026
+#Tue Jun 16 09:56:08 MSK 2026
 base.0=C\:\\Users\\Mechrevo\\StudioProjects\\booking-meeting-rooms-2077\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
 base.1=C\:\\Users\\Mechrevo\\StudioProjects\\booking-meeting-rooms-2077\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
 base.10=C\:\\Users\\Mechrevo\\StudioProjects\\booking-meeting-rooms-2077\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\7\\classes.dex
