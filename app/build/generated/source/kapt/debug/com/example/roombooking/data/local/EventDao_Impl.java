@@ -217,7 +217,7 @@ public final class EventDao_Impl implements EventDao {
   }
 
   @Override
-  public Object insertEvent(final EventEntity event, final Continuation<? super Long> $completion) {
+  public Object insertEvent(final EventEntity event, final Continuation<? super Long> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<Long>() {
       @Override
       @NonNull
@@ -231,11 +231,11 @@ public final class EventDao_Impl implements EventDao {
           __db.endTransaction();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
-  public Object deleteEvent(final EventEntity event, final Continuation<? super Unit> $completion) {
+  public Object deleteEvent(final EventEntity event, final Continuation<? super Unit> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -249,11 +249,11 @@ public final class EventDao_Impl implements EventDao {
           __db.endTransaction();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
-  public Object updateEvent(final EventEntity event, final Continuation<? super Unit> $completion) {
+  public Object updateEvent(final EventEntity event, final Continuation<? super Unit> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -267,11 +267,11 @@ public final class EventDao_Impl implements EventDao {
           __db.endTransaction();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
-  public Object deleteEventById(final long id, final Continuation<? super Unit> $completion) {
+  public Object deleteEventById(final long id, final Continuation<? super Unit> arg1) {
     return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
       @Override
       @NonNull
@@ -292,7 +292,7 @@ public final class EventDao_Impl implements EventDao {
           __preparedStmtOfDeleteEventById.release(_stmt);
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
@@ -812,7 +812,7 @@ public final class EventDao_Impl implements EventDao {
   @Override
   public Object findConflicts(final long roomId, final String date, final String timeStart,
       final String timeEnd, final long excludeId,
-      final Continuation<? super List<EventEntity>> $completion) {
+      final Continuation<? super List<EventEntity>> arg5) {
     final String _sql = "\n"
             + "        SELECT * FROM events\n"
             + "        WHERE roomId = ?\n"
@@ -958,11 +958,11 @@ public final class EventDao_Impl implements EventDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg5);
   }
 
   @Override
-  public Object getAllEventsSync(final Continuation<? super List<EventEntity>> $completion) {
+  public Object getAllEventsSync(final Continuation<? super List<EventEntity>> arg0) {
     final String _sql = "SELECT * FROM events";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
@@ -1080,11 +1080,11 @@ public final class EventDao_Impl implements EventDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg0);
   }
 
   @Override
-  public Object getSyncableEvents(final Continuation<? super List<EventEntity>> $completion) {
+  public Object getSyncableEvents(final Continuation<? super List<EventEntity>> arg0) {
     final String _sql = "SELECT * FROM events WHERE syncToDeviceCalendar = 1";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
     final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
@@ -1202,12 +1202,12 @@ public final class EventDao_Impl implements EventDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg0);
   }
 
   @Override
   public Object findByCalendarEventId(final long calEventId,
-      final Continuation<? super EventEntity> $completion) {
+      final Continuation<? super EventEntity> arg1) {
     final String _sql = "SELECT * FROM events WHERE deviceCalendarEventId = ? LIMIT 1";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -1327,12 +1327,12 @@ public final class EventDao_Impl implements EventDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @Override
   public Object getDatesWithEvents(final String from, final String to,
-      final Continuation<? super List<String>> $completion) {
+      final Continuation<? super List<String>> arg2) {
     final String _sql = "SELECT DISTINCT dateStart FROM events WHERE dateStart BETWEEN ? AND ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 2);
     int _argIndex = 1;
@@ -1370,11 +1370,11 @@ public final class EventDao_Impl implements EventDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg2);
   }
 
   @Override
-  public Object getEventById(final long id, final Continuation<? super EventEntity> $completion) {
+  public Object getEventById(final long id, final Continuation<? super EventEntity> arg1) {
     final String _sql = "SELECT * FROM events WHERE id = ? LIMIT 1";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
     int _argIndex = 1;
@@ -1494,7 +1494,7 @@ public final class EventDao_Impl implements EventDao {
           _statement.release();
         }
       }
-    }, $completion);
+    }, arg1);
   }
 
   @NonNull

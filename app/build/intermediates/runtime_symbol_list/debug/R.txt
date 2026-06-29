@@ -3039,6 +3039,7 @@ int drawable bg_date_oval 0x7f07007b
 int drawable bg_day_selected 0x7f07007c
 int drawable bg_day_today 0x7f07007d
 int drawable bg_event_rect 0x7f07007e
+int drawable bg_room_badge 0x7f0700f5
 int drawable bg_spinner 0x7f07007f
 int drawable bg_white_rounded_top 0x7f070080
 int drawable btn_checkbox_checked_mtrl 0x7f070081
@@ -3283,6 +3284,7 @@ int id btn_reset 0x7f08007a
 int id btn_save 0x7f08007b
 int id btn_save_filter_tags 0x7f08007c
 int id btn_select_calendar 0x7f08007d
+int id btn_set_app_password 0x7f080255
 int id btn_sync_now 0x7f08007e
 int id btn_time_end 0x7f08007f
 int id btn_time_start 0x7f080080
@@ -3444,6 +3446,7 @@ int id layout 0x7f08011b
 int id layout_day_schedule 0x7f08011c
 int id layout_day_title_nav 0x7f08011d
 int id layout_nav_month 0x7f08011e
+int id layout_short 0x7f08025d
 int id left 0x7f08011f
 int id leftToRight 0x7f080120
 int id legacy 0x7f080121
@@ -3708,13 +3711,17 @@ int id transition_position 0x7f080223
 int id transition_scene_layoutid_cache 0x7f080224
 int id transition_transform 0x7f080225
 int id triangle 0x7f080226
+int id tv_app_password_hint 0x7f080256
 int id tv_capacity 0x7f080227
 int id tv_current_time_label 0x7f080228
 int id tv_date 0x7f080229
 int id tv_day 0x7f08022a
 int id tv_day_view_title 0x7f08022b
 int id tv_description 0x7f08022c
+int id tv_event_room 0x7f08025a
+int id tv_event_room_short 0x7f08025e
 int id tv_event_title 0x7f08022d
+int id tv_event_title_short 0x7f08025f
 int id tv_events_header 0x7f08022e
 int id tv_hour 0x7f08022f
 int id tv_last_sync 0x7f080230

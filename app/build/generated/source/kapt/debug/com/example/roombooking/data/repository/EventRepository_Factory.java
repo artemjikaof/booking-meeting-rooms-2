@@ -1,6 +1,7 @@
 package com.example.roombooking.data.repository;
 
 import com.example.roombooking.data.local.EventDao;
+import com.example.roombooking.data.local.RoomDao;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
 import dagger.internal.QualifierMetadata;
@@ -24,6 +25,8 @@ import javax.inject.Provider;
 public final class EventRepository_Factory implements Factory<EventRepository> {
   private final Provider<EventDao> eventDaoProvider;
 
+  private final Provider<RoomDao> roomDaoProvider;
+
   private final Provider<CalendarSyncManager> calendarSyncManagerProvider;
 
   private final Provider<SyncPreferences> prefsProvider;
@@ -31,10 +34,11 @@ public final class EventRepository_Factory implements Factory<EventRepository> {
   private final Provider<YandexCalendarRepository> yandexRepositoryProvider;
 
   public EventRepository_Factory(Provider<EventDao> eventDaoProvider,
-      Provider<CalendarSyncManager> calendarSyncManagerProvider,
+      Provider<RoomDao> roomDaoProvider, Provider<CalendarSyncManager> calendarSyncManagerProvider,
       Provider<SyncPreferences> prefsProvider,
       Provider<YandexCalendarRepository> yandexRepositoryProvider) {
     this.eventDaoProvider = eventDaoProvider;
+    this.roomDaoProvider = roomDaoProvider;
     this.calendarSyncManagerProvider = calendarSyncManagerProvider;
     this.prefsProvider = prefsProvider;
     this.yandexRepositoryProvider = yandexRepositoryProvider;
@@ -42,19 +46,19 @@ public final class EventRepository_Factory implements Factory<EventRepository> {
 
   @Override
   public EventRepository get() {
-    return newInstance(eventDaoProvider.get(), calendarSyncManagerProvider.get(), prefsProvider.get(), yandexRepositoryProvider.get());
+    return newInstance(eventDaoProvider.get(), roomDaoProvider.get(), calendarSyncManagerProvider.get(), prefsProvider.get(), yandexRepositoryProvider.get());
   }
 
   public static EventRepository_Factory create(Provider<EventDao> eventDaoProvider,
-      Provider<CalendarSyncManager> calendarSyncManagerProvider,
+      Provider<RoomDao> roomDaoProvider, Provider<CalendarSyncManager> calendarSyncManagerProvider,
       Provider<SyncPreferences> prefsProvider,
       Provider<YandexCalendarRepository> yandexRepositoryProvider) {
-    return new EventRepository_Factory(eventDaoProvider, calendarSyncManagerProvider, prefsProvider, yandexRepositoryProvider);
+    return new EventRepository_Factory(eventDaoProvider, roomDaoProvider, calendarSyncManagerProvider, prefsProvider, yandexRepositoryProvider);
   }
 
-  public static EventRepository newInstance(EventDao eventDao,
+  public static EventRepository newInstance(EventDao eventDao, RoomDao roomDao,
       CalendarSyncManager calendarSyncManager, SyncPreferences prefs,
       YandexCalendarRepository yandexRepository) {
-    return new EventRepository(eventDao, calendarSyncManager, prefs, yandexRepository);
+    return new EventRepository(eventDao, roomDao, calendarSyncManager, prefs, yandexRepository);
   }
 }

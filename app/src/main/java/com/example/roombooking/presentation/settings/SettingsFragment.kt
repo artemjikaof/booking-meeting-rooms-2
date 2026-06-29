@@ -3,6 +3,7 @@ package com.example.roombooking.presentation.settings
 import android.Manifest
 import android.os.Bundle
 import android.view.*
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -47,8 +48,6 @@ class SettingsFragment : Fragment() {
         observeViewModel()
     }
 
-    // ИСПРАВЛЕНО: обновляем статус Яндекс при каждом возврате на экран
-    // (авторизация происходит в браузере → MainActivity → сюда)
     override fun onResume() {
         super.onResume()
         viewModel.refreshYandexStatus()
@@ -78,12 +77,17 @@ class SettingsFragment : Fragment() {
         }
 
         binding.btnConnectYandex.setOnClickListener {
-            viewModel.clearYandexAuth()  // сначала чистим
+            viewModel.clearYandexAuth()
             val intent = android.content.Intent(
                 android.content.Intent.ACTION_VIEW,
                 android.net.Uri.parse(com.example.roombooking.util.YandexConfig.getAuthUrl())
             )
             startActivity(intent)
+        }
+
+        // Кнопка ввода пароля приложения для CalDAV
+        binding.btnSetAppPassword.setOnClickListener {
+            showAppPasswordDialog()
         }
 
         binding.btnSaveFilterTags.setOnClickListener {
@@ -103,9 +107,22 @@ class SettingsFragment : Fragment() {
                         androidx.core.content.ContextCompat.getColor(requireContext(), android.R.color.holo_red_dark)
                 )
                 binding.btnConnectYandex.text =
-                    if (authorized) "Переподключить" else "Подключить Яндекс Календарь"
+                    if (authorized) "Переподключить Яндекс" else "Подключить Яндекс Календарь"
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            // Показываем кнопку пароля и подсказку как только OAuth пройден,
+            // скрываем когда уже полностью подключено (есть и токен, и пароль)
+            viewModel.oAuthDone.collect { oauthDone ->
+                val fullyConnected = viewModel.yandexAuthorized.value
+                binding.btnSetAppPassword.visibility =
+                    if (oauthDone) View.VISIBLE else View.GONE
+                binding.tvAppPasswordHint.visibility =
+                    if (oauthDone && !fullyConnected) View.VISIBLE else View.GONE
+            }
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.syncEnabled.collect { enabled ->
                 binding.switchSync.isChecked = enabled
@@ -135,16 +152,44 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    private fun showAppPasswordDialog() {
+        val input = EditText(requireContext()).apply {
+            hint = "xxxx xxxx xxxx xxxx"
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                    android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD
+            setPadding(48, 24, 48, 24)
+            // Если пароль уже сохранён — показываем что он есть
+            if (viewModel.hasAppPassword()) setText("••••••••••••••••")
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Пароль приложения Яндекс")
+            .setMessage(
+                "Яндекс CalDAV работает только с паролем приложения (не с вашим основным паролем).\n\n" +
+                        "Как создать:\n" +
+                        "1. Откройте id.yandex.ru\n" +
+                        "2. Безопасность → Пароли приложений\n" +
+                        "3. Создайте пароль и вставьте его ниже"
+            )
+            .setView(input)
+            .setPositiveButton("Сохранить") { _, _ ->
+                val password = input.text.toString().trim().replace(" ", "")
+                if (password.isNotEmpty() && !password.startsWith("•")) {
+                    viewModel.saveAppPassword(password)
+                    Toast.makeText(requireContext(), "Пароль сохранён ✓", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
+    }
+
     private fun showPermissionRationale() {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Доступ к календарю")
             .setMessage("Приложению нужен доступ к вашему календарю для синхронизации мероприятий.")
             .setPositiveButton("Разрешить") { _, _ ->
                 calendarPermissionLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.READ_CALENDAR,
-                        Manifest.permission.WRITE_CALENDAR
-                    )
+                    arrayOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR)
                 )
             }
             .setNegativeButton("Не сейчас", null)

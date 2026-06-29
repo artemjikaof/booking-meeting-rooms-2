@@ -9,6 +9,9 @@ interface RoomDao {
     @Query("SELECT * FROM rooms ORDER BY name ASC")
     fun getAllRooms(): Flow<List<RoomEntity>>
 
+    @Query("SELECT * FROM rooms ORDER BY name ASC")
+    suspend fun getAllRoomsSync(): List<RoomEntity>
+
     @Query("SELECT * FROM rooms WHERE id = :id")
     suspend fun getRoomById(id: Long): RoomEntity?
 

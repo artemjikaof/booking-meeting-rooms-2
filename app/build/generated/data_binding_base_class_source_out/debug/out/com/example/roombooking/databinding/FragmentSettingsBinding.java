@@ -33,6 +33,9 @@ public final class FragmentSettingsBinding implements ViewBinding {
   public final MaterialButton btnSelectCalendar;
 
   @NonNull
+  public final MaterialButton btnSetAppPassword;
+
+  @NonNull
   public final MaterialButton btnSyncNow;
 
   @NonNull
@@ -48,6 +51,9 @@ public final class FragmentSettingsBinding implements ViewBinding {
   public final MaterialToolbar toolbar;
 
   @NonNull
+  public final TextView tvAppPasswordHint;
+
+  @NonNull
   public final TextView tvLastSync;
 
   @NonNull
@@ -58,20 +64,23 @@ public final class FragmentSettingsBinding implements ViewBinding {
 
   private FragmentSettingsBinding(@NonNull LinearLayout rootView,
       @NonNull MaterialButton btnConnectYandex, @NonNull MaterialButton btnSaveFilterTags,
-      @NonNull MaterialButton btnSelectCalendar, @NonNull MaterialButton btnSyncNow,
-      @NonNull TextInputEditText etFilterTags, @NonNull LinearLayout groupSyncSettings,
-      @NonNull SwitchMaterial switchSync, @NonNull MaterialToolbar toolbar,
+      @NonNull MaterialButton btnSelectCalendar, @NonNull MaterialButton btnSetAppPassword,
+      @NonNull MaterialButton btnSyncNow, @NonNull TextInputEditText etFilterTags,
+      @NonNull LinearLayout groupSyncSettings, @NonNull SwitchMaterial switchSync,
+      @NonNull MaterialToolbar toolbar, @NonNull TextView tvAppPasswordHint,
       @NonNull TextView tvLastSync, @NonNull TextView tvSyncStatus,
       @NonNull TextView tvYandexStatus) {
     this.rootView = rootView;
     this.btnConnectYandex = btnConnectYandex;
     this.btnSaveFilterTags = btnSaveFilterTags;
     this.btnSelectCalendar = btnSelectCalendar;
+    this.btnSetAppPassword = btnSetAppPassword;
     this.btnSyncNow = btnSyncNow;
     this.etFilterTags = etFilterTags;
     this.groupSyncSettings = groupSyncSettings;
     this.switchSync = switchSync;
     this.toolbar = toolbar;
+    this.tvAppPasswordHint = tvAppPasswordHint;
     this.tvLastSync = tvLastSync;
     this.tvSyncStatus = tvSyncStatus;
     this.tvYandexStatus = tvYandexStatus;
@@ -122,6 +131,12 @@ public final class FragmentSettingsBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btn_set_app_password;
+      MaterialButton btnSetAppPassword = ViewBindings.findChildViewById(rootView, id);
+      if (btnSetAppPassword == null) {
+        break missingId;
+      }
+
       id = R.id.btn_sync_now;
       MaterialButton btnSyncNow = ViewBindings.findChildViewById(rootView, id);
       if (btnSyncNow == null) {
@@ -152,6 +167,12 @@ public final class FragmentSettingsBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.tv_app_password_hint;
+      TextView tvAppPasswordHint = ViewBindings.findChildViewById(rootView, id);
+      if (tvAppPasswordHint == null) {
+        break missingId;
+      }
+
       id = R.id.tv_last_sync;
       TextView tvLastSync = ViewBindings.findChildViewById(rootView, id);
       if (tvLastSync == null) {
@@ -171,8 +192,9 @@ public final class FragmentSettingsBinding implements ViewBinding {
       }
 
       return new FragmentSettingsBinding((LinearLayout) rootView, btnConnectYandex,
-          btnSaveFilterTags, btnSelectCalendar, btnSyncNow, etFilterTags, groupSyncSettings,
-          switchSync, toolbar, tvLastSync, tvSyncStatus, tvYandexStatus);
+          btnSaveFilterTags, btnSelectCalendar, btnSetAppPassword, btnSyncNow, etFilterTags,
+          groupSyncSettings, switchSync, toolbar, tvAppPasswordHint, tvLastSync, tvSyncStatus,
+          tvYandexStatus);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

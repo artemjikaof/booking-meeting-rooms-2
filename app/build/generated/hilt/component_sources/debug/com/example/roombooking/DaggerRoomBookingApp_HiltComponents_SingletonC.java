@@ -679,6 +679,10 @@ public final class DaggerRoomBookingApp_HiltComponents_SingletonC {
       return DatabaseModule_ProvideEventDaoFactory.provideEventDao(provideDatabaseProvider.get());
     }
 
+    private RoomDao roomDao() {
+      return DatabaseModule_ProvideRoomDaoFactory.provideRoomDao(provideDatabaseProvider.get());
+    }
+
     private Map<String, javax.inject.Provider<WorkerAssistedFactory<? extends ListenableWorker>>> mapOfStringAndProviderOfWorkerAssistedFactoryOf(
         ) {
       return Collections.<String, javax.inject.Provider<WorkerAssistedFactory<? extends ListenableWorker>>>singletonMap("com.example.roombooking.util.CalendarSyncWorker", ((Provider) calendarSyncWorker_AssistedFactoryProvider));
@@ -686,10 +690,6 @@ public final class DaggerRoomBookingApp_HiltComponents_SingletonC {
 
     private HiltWorkerFactory hiltWorkerFactory() {
       return WorkerFactoryModule_ProvideFactoryFactory.provideFactory(mapOfStringAndProviderOfWorkerAssistedFactoryOf());
-    }
-
-    private RoomDao roomDao() {
-      return DatabaseModule_ProvideRoomDaoFactory.provideRoomDao(provideDatabaseProvider.get());
     }
 
     @SuppressWarnings("unchecked")
@@ -774,7 +774,7 @@ public final class DaggerRoomBookingApp_HiltComponents_SingletonC {
           };
 
           case 1: // com.example.roombooking.data.repository.EventRepository 
-          return (T) new EventRepository(singletonCImpl.eventDao(), singletonCImpl.calendarSyncManagerProvider.get(), singletonCImpl.syncPreferencesProvider.get(), singletonCImpl.yandexCalendarRepositoryProvider.get());
+          return (T) new EventRepository(singletonCImpl.eventDao(), singletonCImpl.roomDao(), singletonCImpl.calendarSyncManagerProvider.get(), singletonCImpl.syncPreferencesProvider.get(), singletonCImpl.yandexCalendarRepositoryProvider.get());
 
           case 2: // com.example.roombooking.data.local.AppDatabase 
           return (T) DatabaseModule_ProvideDatabaseFactory.provideDatabase(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));

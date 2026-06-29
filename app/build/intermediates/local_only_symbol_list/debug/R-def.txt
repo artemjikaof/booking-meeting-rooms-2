@@ -22,6 +22,7 @@ drawable bg_date_oval
 drawable bg_day_selected
 drawable bg_day_today
 drawable bg_event_rect
+drawable bg_room_badge
 drawable bg_spinner
 drawable bg_white_rounded_top
 drawable dot_event
@@ -61,6 +62,7 @@ id btn_reset
 id btn_save
 id btn_save_filter_tags
 id btn_select_calendar
+id btn_set_app_password
 id btn_sync_now
 id btn_time_end
 id btn_time_start
@@ -87,6 +89,7 @@ id group_sync_settings
 id layout_day_schedule
 id layout_day_title_nav
 id layout_nav_month
+id layout_short
 id nav_graph
 id nav_host_fragment
 id roomDetailFragment
@@ -103,13 +106,17 @@ id tab_month
 id tab_week
 id toggle_group_view
 id toolbar
+id tv_app_password_hint
 id tv_capacity
 id tv_current_time_label
 id tv_date
 id tv_day
 id tv_day_view_title
 id tv_description
+id tv_event_room
+id tv_event_room_short
 id tv_event_title
+id tv_event_title_short
 id tv_events_header
 id tv_hour
 id tv_last_sync

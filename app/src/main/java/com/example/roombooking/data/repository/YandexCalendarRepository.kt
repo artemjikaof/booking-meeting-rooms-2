@@ -9,8 +9,9 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import retrofit2.HttpException
+import java.time.LocalDateTime
 import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -46,11 +47,15 @@ class YandexCalendarRepository @Inject constructor(
         }
     }
 
-    // ИСПРАВЛЕНО: проверяем только логин + accessToken (не требуем пароль приложения)
     fun isAuthorized(): Boolean {
         val login = syncPrefs.yandexLogin ?: tokenManager.getUserLogin()
-        val token = tokenManager.getAccessToken()
-        return login != null && token != null
+        val password = syncPrefs.yandexAppPassword
+        return login != null && password != null
+    }
+
+    fun isOAuthDone(): Boolean {
+        val login = syncPrefs.yandexLogin ?: tokenManager.getUserLogin()
+        return login != null
     }
 
     fun clearAuth() {
@@ -66,13 +71,9 @@ class YandexCalendarRepository @Inject constructor(
             syncPrefs.yandexLogin = login
             return login to userId
         }
-
         val info = authApi.getUserInfo("OAuth $token")
-        // CalDAV часто требует именно email или первичный логин. 
-        // Если есть default_email, используем его, иначе login.
         val baseLogin = info.email ?: info.login
         val fullLogin = if (baseLogin.contains("@")) baseLogin else "$baseLogin@yandex.ru"
-
         tokenManager.saveUserLogin(fullLogin, info.id)
         syncPrefs.yandexLogin = fullLogin
         android.util.Log.d("YandexRepo", "User login: $fullLogin, id: ${info.id}")
@@ -84,59 +85,14 @@ class YandexCalendarRepository @Inject constructor(
         android.util.Log.d("YandexRepo", "App password saved")
     }
 
-    private suspend fun refreshToken(): Boolean {
-        val refreshToken = tokenManager.getRefreshToken() ?: return false
-        return try {
-            val response = authApi.refreshToken(
-                grantType = "refresh_token",
-                refreshToken = refreshToken,
-                clientId = YandexConfig.CLIENT_ID,
-                clientSecret = YandexConfig.CLIENT_SECRET
-            )
-            tokenManager.saveTokens(response.accessToken, response.refreshToken, response.expiresIn)
-            android.util.Log.i("YandexRepo", "Token refreshed successfully")
-            true
-        } catch (e: Exception) {
-            android.util.Log.e("YandexRepo", "Token refresh failed", e)
-            if (e is HttpException && (e.code() == 400 || e.code() == 401)) {
-                android.util.Log.w("YandexRepo", "Refresh token invalid, clearing auth")
-                clearAuth()
-            }
-            false
-        }
-    }
+    // ─── Basic Auth ───────────────────────────────────────────────────────
 
-    // ─── ИСПРАВЛЕНО: используем OAuth токен вместо Basic Auth ─────────────
-
-    private fun authHeader(): String {
-        val token = tokenManager.getAccessToken()
-            ?: throw Exception("Нет токена авторизации")
-        return "OAuth $token"
-    }
-
-    private suspend fun executeWithRefresh(requestBuilder: Request.Builder): okhttp3.Response {
-        // Проверяем срок действия перед запросом
-        if (tokenManager.isTokenExpired()) {
-            refreshToken()
-        }
-
-        val request = requestBuilder
-            .header("Authorization", authHeader())
-            .build()
-
-        val response = httpClient.newCall(request).execute()
-
-        if (response.code == 401) {
-            android.util.Log.w("YandexRepo", "401 Unauthorized, attempting token refresh...")
-            if (refreshToken()) {
-                response.close()
-                val retryRequest = requestBuilder
-                    .header("Authorization", authHeader())
-                    .build()
-                return httpClient.newCall(retryRequest).execute()
-            }
-        }
-        return response
+    private fun basicAuthHeader(login: String, password: String): String {
+        val credentials = Base64.encodeToString(
+            "$login:$password".toByteArray(Charsets.UTF_8),
+            Base64.NO_WRAP
+        )
+        return "Basic $credentials"
     }
 
     // ─── Чтение событий из Яндекс Календаря ───────────────────────────────
@@ -144,15 +100,13 @@ class YandexCalendarRepository @Inject constructor(
     suspend fun getYandexEvents(): Result<List<CalendarEventData>> {
         val login = syncPrefs.yandexLogin ?: tokenManager.getUserLogin()
         ?: return Result.failure(Exception("Не авторизован"))
-
-        // Проверяем что токен есть
-        tokenManager.getAccessToken()
-            ?: return Result.failure(Exception("Нет токена авторизации"))
+        val appPassword = syncPrefs.yandexAppPassword
+            ?: return Result.failure(Exception("Пароль приложения не задан"))
 
         return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             try {
                 val url = "https://caldav.yandex.ru/calendars/$login/events-default/"
-                android.util.Log.d("YandexRepo", "Fetching events from: $url")
+                android.util.Log.d("YandexRepo", "CalDAV REPORT: $url")
 
                 val reportXml = """<?xml version="1.0" encoding="UTF-8"?>
 <C:calendar-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
@@ -167,24 +121,33 @@ class YandexCalendarRepository @Inject constructor(
   </C:filter>
 </C:calendar-query>"""
 
-                val requestBuilder = Request.Builder()
+                val request = Request.Builder()
                     .url(url)
                     .method("REPORT", reportXml.toRequestBody("application/xml; charset=utf-8".toMediaTypeOrNull()))
+                    .header("Authorization", basicAuthHeader(login, appPassword))
                     .header("Depth", "1")
+                    .build()
 
-                val response = executeWithRefresh(requestBuilder)
+                val response = httpClient.newCall(request).execute()
                 val responseCode = response.code
                 val body = response.use { it.body?.string() ?: "" }
 
-                android.util.Log.d("YandexRepo", "CalDAV REPORT response code: $responseCode")
+                android.util.Log.d("YandexRepo", "CalDAV REPORT $responseCode, body: ${body.length} chars")
 
-                if (responseCode in 200..299) {
-                    val events = parseCalDavResponse(body)
-                    android.util.Log.i("YandexRepo", "Fetched ${events.size} events from Yandex")
-                    Result.success(events)
-                } else {
-                    android.util.Log.e("YandexRepo", "CalDAV REPORT failed $responseCode. Body: $body")
-                    Result.failure(Exception("CalDAV REPORT failed: $responseCode"))
+                when {
+                    responseCode in 200..299 -> {
+                        val events = parseCalDavResponse(body)
+                        android.util.Log.i("YandexRepo", "Fetched ${events.size} events from Yandex")
+                        Result.success(events)
+                    }
+                    responseCode == 401 -> {
+                        android.util.Log.e("YandexRepo", "CalDAV 401 — неверный пароль приложения")
+                        Result.failure(Exception("Неверный пароль приложения (401)"))
+                    }
+                    else -> {
+                        android.util.Log.e("YandexRepo", "CalDAV REPORT $responseCode: $body")
+                        Result.failure(Exception("CalDAV ошибка $responseCode"))
+                    }
                 }
             } catch (e: Exception) {
                 android.util.Log.e("YandexRepo", "getYandexEvents failed", e)
@@ -205,9 +168,8 @@ class YandexCalendarRepository @Inject constructor(
     ): Result<String> {
         val login = syncPrefs.yandexLogin ?: tokenManager.getUserLogin()
         ?: return Result.failure(Exception("Не авторизован"))
-
-        tokenManager.getAccessToken()
-            ?: return Result.failure(Exception("Нет токена авторизации"))
+        val appPassword = syncPrefs.yandexAppPassword
+            ?: return Result.failure(Exception("Пароль приложения не задан"))
 
         return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             try {
@@ -216,11 +178,13 @@ class YandexCalendarRepository @Inject constructor(
 
                 val ics = generateIcs(summary, description, start, end, location, externalId)
 
-                val requestBuilder = Request.Builder()
+                val request = Request.Builder()
                     .url(url)
                     .put(ics.toRequestBody("text/calendar; charset=utf-8".toMediaTypeOrNull()))
+                    .header("Authorization", basicAuthHeader(login, appPassword))
+                    .build()
 
-                val response = executeWithRefresh(requestBuilder)
+                val response = httpClient.newCall(request).execute()
                 val responseCode = response.code
                 response.body?.close()
 
@@ -240,30 +204,26 @@ class YandexCalendarRepository @Inject constructor(
     // ─── Обновление / удаление ─────────────────────────────────────────────
 
     suspend fun updateYandexEvent(
-        yandexEventId: String,
-        summary: String,
-        description: String?,
-        start: String,
-        end: String,
-        location: String,
-        externalId: String
+        yandexEventId: String, summary: String, description: String?,
+        start: String, end: String, location: String, externalId: String
     ): Result<Unit> = syncBookingToYandex(summary, description, start, end, location, externalId).map {}
 
     suspend fun deleteYandexEvent(yandexEventId: String): Result<Unit> {
         val login = syncPrefs.yandexLogin ?: tokenManager.getUserLogin()
         ?: return Result.failure(Exception("Не авторизован"))
-
-        tokenManager.getAccessToken()
-            ?: return Result.failure(Exception("Нет токена авторизации"))
+        val appPassword = syncPrefs.yandexAppPassword
+            ?: return Result.failure(Exception("Пароль приложения не задан"))
 
         return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             try {
                 val url = "https://caldav.yandex.ru/calendars/$login/events-default/$yandexEventId.ics"
-                val requestBuilder = Request.Builder()
+                val request = Request.Builder()
                     .url(url)
                     .delete()
+                    .header("Authorization", basicAuthHeader(login, appPassword))
+                    .build()
 
-                val response = executeWithRefresh(requestBuilder)
+                val response = httpClient.newCall(request).execute()
                 val responseCode = response.code
                 response.body?.close()
 
@@ -279,18 +239,18 @@ class YandexCalendarRepository @Inject constructor(
 
     private fun generateIcs(
         summary: String, description: String?,
-        start: String, end: String,
-        location: String, externalId: String
+        start: String, end: String, location: String, externalId: String
     ): String {
+        // ИСПРАВЛЕНО: конвертируем в UTC — суффикс Z означает UTC,
+        // Яндекс сам покажет время в локальной зоне пользователя
+        // Раньше было +03:00 хардкодом — из-за этого сдвиг на 3 часа
         val startUtc = OffsetDateTime.parse(start).atZoneSameInstant(ZoneOffset.UTC)
         val endUtc = OffsetDateTime.parse(end).atZoneSameInstant(ZoneOffset.UTC)
         val now = OffsetDateTime.now(ZoneOffset.UTC).format(icsDateFormatter)
 
         fun escape(s: String) = s
-            .replace("\\", "\\\\")
-            .replace(";", "\\;")
-            .replace(",", "\\,")
-            .replace("\n", "\\n")
+            .replace("\\", "\\\\").replace(";", "\\;")
+            .replace(",", "\\,").replace("\n", "\\n")
 
         return buildString {
             append("BEGIN:VCALENDAR\r\n")
@@ -322,18 +282,14 @@ class YandexCalendarRepository @Inject constructor(
                 val summary = extractIcsField(ics, "SUMMARY") ?: ""
                 val description = extractIcsField(ics, "DESCRIPTION") ?: ""
                 val location = extractIcsField(ics, "LOCATION") ?: ""
-                val dtStart = parseIcsDate(extractIcsField(ics, "DTSTART")) ?: return@forEach
-                val dtEnd = parseIcsDate(extractIcsField(ics, "DTEND")) ?: dtStart + 3600_000
-                events.add(
-                    CalendarEventData(
-                        id = uid.hashCode().toLong(),
-                        title = summary,
-                        description = description,
-                        location = location,
-                        dtStart = dtStart,
-                        dtEnd = dtEnd
-                    )
-                )
+                // ИСПРАВЛЕНО: используем extractIcsFieldWithParams — умеет читать TZID=
+                val dtStart = parseIcsDate(extractIcsFieldWithParams(ics, "DTSTART")) ?: return@forEach
+                val dtEnd = parseIcsDate(extractIcsFieldWithParams(ics, "DTEND")) ?: dtStart + 3600_000
+                events.add(CalendarEventData(
+                    id = uid.hashCode().toLong(), title = summary,
+                    description = description, location = location,
+                    dtStart = dtStart, dtEnd = dtEnd
+                ))
             } catch (e: Exception) {
                 android.util.Log.w("YandexRepo", "Failed to parse VEVENT", e)
             }
@@ -342,21 +298,69 @@ class YandexCalendarRepository @Inject constructor(
     }
 
     private fun extractIcsField(ics: String, field: String): String? =
-        Regex("^$field[^:]*:(.+)$", RegexOption.MULTILINE)
+        Regex("^$field[^:;]*:(.+)$", RegexOption.MULTILINE)
             .find(ics)?.groupValues?.get(1)?.trim()
+
+    // ИСПРАВЛЕНО: обрабатывает оба формата:
+    // "DTSTART:20260629T053000Z"               → возвращает "20260629T053000Z"
+    // "DTSTART;TZID=Europe/Moscow:20260629T083000" → возвращает "20260629T083000|TZID=Europe/Moscow"
+    private fun extractIcsFieldWithParams(ics: String, field: String): String? {
+        // Сначала проверяем формат с TZID
+        val tzidRegex = Regex("^$field;TZID=([^:]+):(.+)$", RegexOption.MULTILINE)
+        val tzidMatch = tzidRegex.find(ics)
+        if (tzidMatch != null) {
+            val tzId = tzidMatch.groupValues[1].trim()
+            val dateValue = tzidMatch.groupValues[2].trim()
+            return "$dateValue|TZID=$tzId"
+        }
+        // Обычный формат без параметров
+        return Regex("^$field:(.+)$", RegexOption.MULTILINE)
+            .find(ics)?.groupValues?.get(1)?.trim()
+    }
 
     private fun parseIcsDate(dateStr: String?): Long? {
         dateStr ?: return null
         return try {
-            val normalized = dateStr
-                .replace(Regex("(\\d{4})(\\d{2})(\\d{2})T(\\d{2})(\\d{2})(\\d{2})Z"),
-                    "$1-$2-$3T$4:$5:$6+00:00")
-                .replace(Regex("(\\d{4})(\\d{2})(\\d{2})T(\\d{2})(\\d{2})(\\d{2})"),
-                    "$1-$2-$3T$4:$5:$6")
-                .let { if (!it.contains("+") && !it.endsWith("Z")) "${it}+00:00" else it }
-            OffsetDateTime.parse(normalized).toInstant().toEpochMilli()
+            // Формат с TZID: "20260629T083000|TZID=Europe/Moscow"
+            if (dateStr.contains("|TZID=")) {
+                val parts = dateStr.split("|TZID=")
+                val rawDate = parts[0].trim()   // "20260629T083000"
+                val tzId = parts[1].trim()      // "Europe/Moscow"
+
+                // 20260629T083000 → 2026-06-29T08:30:00
+                val normalized = rawDate.replace(
+                    Regex("(\\d{4})(\\d{2})(\\d{2})T(\\d{2})(\\d{2})(\\d{2})"),
+                    "$1-$2-$3T$4:$5:$6"
+                )
+                val zone = try {
+                    ZoneId.of(tzId)
+                } catch (e: Exception) {
+                    android.util.Log.w("YandexRepo", "Unknown TZID '$tzId', fallback to Moscow")
+                    ZoneId.of("Europe/Moscow")
+                }
+                LocalDateTime.parse(normalized)
+                    .atZone(zone)
+                    .toInstant()
+                    .toEpochMilli()
+            } else {
+                // Форматы без TZID:
+                // "20260629T053000Z" (UTC с Z)
+                // "20260629T053000"  (без зоны — считаем UTC)
+                // "2026-06-29T05:30:00Z" (уже ISO)
+                val normalized = dateStr
+                    .replace(Regex("(\\d{4})(\\d{2})(\\d{2})T(\\d{2})(\\d{2})(\\d{2})Z"),
+                        "$1-$2-$3T$4:$5:$6+00:00")
+                    .replace(Regex("(\\d{4})(\\d{2})(\\d{2})T(\\d{2})(\\d{2})(\\d{2})$"),
+                        "$1-$2-$3T$4:$5:$6+00:00")
+                    .let {
+                        // Если уже содержит разделители дат и нет зоны — добавим UTC
+                        if (it.matches(Regex("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$")))
+                            "${it}+00:00" else it
+                    }
+                OffsetDateTime.parse(normalized).toInstant().toEpochMilli()
+            }
         } catch (e: Exception) {
-            android.util.Log.w("YandexRepo", "Cannot parse ICS date: $dateStr", e)
+            android.util.Log.w("YandexRepo", "Cannot parse ICS date: '$dateStr'", e)
             null
         }
     }

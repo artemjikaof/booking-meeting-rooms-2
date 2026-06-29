@@ -159,37 +159,67 @@ class CalendarFragment : Fragment() {
         val hourHeightDp = 60
         val leftMarginPx = (50 * density).toInt()
 
-        // Сортируем по времени начала
-        val sortedEvents = events.sortedBy { it.timeStart }
+        val ignoredRooms = setOf("яндекс календарь", "yandex calendar")
 
-        sortedEvents.forEach { event ->
+        events.sortedBy { it.timeStart }.forEach { event ->
             try {
                 val start = java.time.LocalTime.parse(event.timeStart)
-                val end = java.time.LocalTime.parse(event.timeEnd)
-                
+                val end   = java.time.LocalTime.parse(event.timeEnd)
                 val startMinutes = start.hour * 60 + start.minute
-                val endMinutes = end.hour * 60 + end.minute
+                val endMinutes   = end.hour * 60 + end.minute
                 val duration = endMinutes - startMinutes
-                
                 if (duration <= 0) return@forEach
 
-                // Рассчитываем позицию (учитываем смещение линии в 10dp)
-                val topPx = ((startMinutes * hourHeightDp / 60f + 10) * density).toInt()
-                // Уменьшаем высоту на 2px для зазора между событиями
+                val topPx    = ((startMinutes * hourHeightDp / 60f + 10) * density).toInt()
                 val heightPx = (duration * hourHeightDp / 60f * density).toInt() - 2
 
-                val eventView = LayoutInflater.from(requireContext()).inflate(R.layout.item_event_rect, layout, false)
-                eventView.findViewById<TextView>(R.id.tv_event_title).text = event.title
-                
+                val eventView = LayoutInflater.from(requireContext())
+                    .inflate(R.layout.item_event_rect, layout, false)
+
+                val tvTitle      = eventView.findViewById<TextView>(R.id.tv_event_title)
+                val tvRoom       = eventView.findViewById<TextView>(R.id.tv_event_room)
+                val layoutShort  = eventView.findViewById<View>(R.id.layout_short)
+                val tvTitleShort = eventView.findViewById<TextView>(R.id.tv_event_title_short)
+                val tvRoomShort  = eventView.findViewById<TextView>(R.id.tv_event_room_short)
+
+                val room = event.roomName.orEmpty().trim()
+                val showRoom = room.isNotBlank() && !ignoredRooms.contains(room.lowercase())
+
+                if (duration >= 60) {
+                    // Длинное событие — название + бейдж снизу
+                    tvTitle.visibility = View.VISIBLE
+                    tvTitle.text = event.title
+                    layoutShort.visibility = View.GONE
+
+                    if (showRoom) {
+                        tvRoom.text = room
+                        tvRoom.visibility = View.VISIBLE
+                    } else {
+                        tvRoom.visibility = View.GONE
+                    }
+                } else {
+                    // Короткое событие — одна строка: название + бейдж справа
+                    tvTitle.visibility = View.GONE
+                    tvRoom.visibility = View.GONE
+                    layoutShort.visibility = View.VISIBLE
+                    tvTitleShort.text = event.title
+
+                    if (showRoom) {
+                        tvRoomShort.text = room
+                        tvRoomShort.visibility = View.VISIBLE
+                    } else {
+                        tvRoomShort.visibility = View.GONE
+                    }
+                }
+
                 val params = RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     if (heightPx > 0) heightPx else 1
                 ).apply {
-                    topMargin = topPx + 1 // Смещение на 1px для зазора сверху
-                    leftMargin = leftMarginPx
+                    topMargin   = topPx + 1
+                    leftMargin  = leftMarginPx
                     rightMargin = (8 * density).toInt()
                 }
-                
                 eventView.layoutParams = params
                 eventView.setOnClickListener { openEventDetail(event) }
                 layout.addView(eventView)
@@ -197,7 +227,6 @@ class CalendarFragment : Fragment() {
                 e.printStackTrace()
             }
         }
-        // После отрисовки событий снова поднимаем индикатор времени наверх
         binding.viewCurrentTimeIndicator.bringToFront()
     }
 

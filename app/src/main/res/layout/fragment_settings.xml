@@ -171,6 +171,7 @@
                         android:textSize="14sp"
                         android:textColor="?attr/colorError" />
 
+                    <!-- Шаг 1: войти через OAuth -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_connect_yandex"
                         style="@style/Widget.Material3.Button.TonalButton"
@@ -178,6 +179,29 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="Подключить Яндекс Календарь" />
+
+                    <!-- Шаг 2: ввести пароль приложения для CalDAV -->
+                    <!-- Яндекс CalDAV не принимает OAuth — нужен отдельный пароль приложения -->
+                    <!-- Создать: id.yandex.ru → Безопасность → Пароли приложений -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_set_app_password"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Ввести пароль приложения (для CalDAV)"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/tv_app_password_hint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="⚠ Яндекс CalDAV требует отдельный пароль приложения.\nСоздайте его на id.yandex.ru → Безопасность → Пароли приложений"
+                        android:textSize="11sp"
+                        android:textColor="?attr/colorError"
+                        android:visibility="gone" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

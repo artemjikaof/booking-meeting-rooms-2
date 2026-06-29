@@ -30,8 +30,13 @@ class SettingsViewModel @Inject constructor(
     private val _syncEnabled = MutableStateFlow(syncPrefs.syncEnabled)
     val syncEnabled: StateFlow<Boolean> = _syncEnabled.asStateFlow()
 
+    // Полностью подключено = login + appPassword
     private val _yandexAuthorized = MutableStateFlow(yandexRepository.isAuthorized())
     val yandexAuthorized: StateFlow<Boolean> = _yandexAuthorized.asStateFlow()
+
+    // OAuth пройден (есть токен), но пароль приложения ещё может отсутствовать
+    private val _oAuthDone = MutableStateFlow(yandexRepository.isOAuthDone())
+    val oAuthDone: StateFlow<Boolean> = _oAuthDone.asStateFlow()
 
     private val _availableCalendars = MutableStateFlow<List<DeviceCalendar>>(emptyList())
     val availableCalendars: StateFlow<List<DeviceCalendar>> = _availableCalendars.asStateFlow()
@@ -57,9 +62,17 @@ class SettingsViewModel @Inject constructor(
                 ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_CALENDAR) ==
                 PackageManager.PERMISSION_GRANTED
 
-    // Вызывается из onResume() фрагмента
     fun refreshYandexStatus() {
         _yandexAuthorized.value = yandexRepository.isAuthorized()
+        _oAuthDone.value = yandexRepository.isOAuthDone()
+    }
+
+    fun hasAppPassword(): Boolean = syncPrefs.yandexAppPassword != null
+
+    fun saveAppPassword(password: String) {
+        yandexRepository.saveAppPassword(password)
+        _yandexAuthorized.value = yandexRepository.isAuthorized()
+        _oAuthDone.value = yandexRepository.isOAuthDone()
     }
 
     fun setSyncEnabled(enabled: Boolean) {
@@ -82,8 +95,6 @@ class SettingsViewModel @Inject constructor(
         _filterTags.value = tags
     }
 
-    // ИСПРАВЛЕНО: убран дублирующий вызов getYandexEvents() —
-    // syncWithDeviceCalendar() уже синхронизирует Яндекс внутри себя
     fun syncNow() {
         if (!hasCalendarPermission) {
             _syncStatus.value = "Нет разрешения на доступ к календарю"
@@ -111,14 +122,13 @@ class SettingsViewModel @Inject constructor(
     fun clearYandexAuth() {
         yandexRepository.clearAuth()
         _yandexAuthorized.value = false
+        _oAuthDone.value = false
     }
 
     private fun scheduleBackgroundSync() {
         val request = PeriodicWorkRequestBuilder<CalendarSyncWorker>(4, TimeUnit.HOURS)
             .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
-                    .build()
+                Constraints.Builder().setRequiredNetworkType(NetworkType.NOT_REQUIRED).build()
             )
             .build()
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(

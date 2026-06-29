@@ -227,6 +227,59 @@ public final class RoomDao_Impl implements RoomDao {
   }
 
   @Override
+  public Object getAllRoomsSync(final Continuation<? super List<RoomEntity>> $completion) {
+    final String _sql = "SELECT * FROM rooms ORDER BY name ASC";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<RoomEntity>>() {
+      @Override
+      @NonNull
+      public List<RoomEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfName = CursorUtil.getColumnIndexOrThrow(_cursor, "name");
+          final int _cursorIndexOfCapacity = CursorUtil.getColumnIndexOrThrow(_cursor, "capacity");
+          final int _cursorIndexOfDescription = CursorUtil.getColumnIndexOrThrow(_cursor, "description");
+          final int _cursorIndexOfPhotoUris = CursorUtil.getColumnIndexOrThrow(_cursor, "photoUris");
+          final List<RoomEntity> _result = new ArrayList<RoomEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final RoomEntity _item;
+            final long _tmpId;
+            _tmpId = _cursor.getLong(_cursorIndexOfId);
+            final String _tmpName;
+            if (_cursor.isNull(_cursorIndexOfName)) {
+              _tmpName = null;
+            } else {
+              _tmpName = _cursor.getString(_cursorIndexOfName);
+            }
+            final int _tmpCapacity;
+            _tmpCapacity = _cursor.getInt(_cursorIndexOfCapacity);
+            final String _tmpDescription;
+            if (_cursor.isNull(_cursorIndexOfDescription)) {
+              _tmpDescription = null;
+            } else {
+              _tmpDescription = _cursor.getString(_cursorIndexOfDescription);
+            }
+            final String _tmpPhotoUris;
+            if (_cursor.isNull(_cursorIndexOfPhotoUris)) {
+              _tmpPhotoUris = null;
+            } else {
+              _tmpPhotoUris = _cursor.getString(_cursorIndexOfPhotoUris);
+            }
+            _item = new RoomEntity(_tmpId,_tmpName,_tmpCapacity,_tmpDescription,_tmpPhotoUris);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
   public Object getRoomById(final long id, final Continuation<? super RoomEntity> $completion) {
     final String _sql = "SELECT * FROM rooms WHERE id = ?";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);

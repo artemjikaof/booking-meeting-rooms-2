@@ -74,6 +74,7 @@ class RoomRepository @Inject constructor(private val roomDao: RoomDao) {
 @Singleton
 class EventRepository @Inject constructor(
     private val eventDao: EventDao,
+    private val roomDao: RoomDao,
     private val calendarSyncManager: CalendarSyncManager,
     private val prefs: SyncPreferences,
     private val yandexRepository: YandexCalendarRepository
@@ -99,6 +100,24 @@ class EventRepository @Inject constructor(
         roomId: Long, date: String, timeStart: String, timeEnd: String, excludeId: Long = 0L
     ): Boolean = eventDao.findConflicts(roomId, date, timeStart, timeEnd, excludeId).isNotEmpty()
 
+    // Ищем комнату по названию из location события Яндекса/Calendar
+    private suspend fun resolveRoomByName(locationName: String): Pair<Long, String> {
+        if (locationName.isBlank()) return Pair(0L, "")
+        val allRooms: List<RoomEntity> = roomDao.getAllRoomsSync()
+        val match: RoomEntity? = allRooms.firstOrNull { roomEntity: RoomEntity ->
+            roomEntity.name.equals(locationName.trim(), ignoreCase = true) ||
+                    locationName.trim().contains(roomEntity.name, ignoreCase = true) ||
+                    roomEntity.name.contains(locationName.trim(), ignoreCase = true)
+        }
+        return if (match != null) {
+            android.util.Log.d("EventRepo", "Room matched: '${match.name}' for '$locationName'")
+            Pair(match.id, match.name)
+        } else {
+            android.util.Log.d("EventRepo", "No room match for '$locationName'")
+            Pair(0L, locationName)
+        }
+    }
+
     suspend fun insertEvent(event: Event): Long {
         val id = eventDao.insertEvent(event.toEntity())
 
@@ -112,7 +131,7 @@ class EventRepository @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                android.util.Log.w("EventRepository", "Calendar sync failed on insert: ${e.message}")
+                android.util.Log.w("EventRepo", "Calendar sync failed on insert: ${e.message}")
             }
         }
 
@@ -123,15 +142,14 @@ class EventRepository @Inject constructor(
                     description = event.description,
                     start = "${event.dateStart}T${event.timeStart}:00+03:00",
                     end = "${event.dateEnd}T${event.timeEnd}:00+03:00",
-                    location = event.roomName,
+                    location = event.roomName ?: "",
                     externalId = id.toString()
                 ).getOrNull()
-
                 if (yandexId != null) {
                     eventDao.updateEvent(eventDao.getEventById(id)!!.copy(yandexEventId = yandexId))
                 }
             } catch (e: Exception) {
-                android.util.Log.e("EventRepository", "Yandex sync failed during insert", e)
+                android.util.Log.e("EventRepo", "Yandex sync failed during insert", e)
             }
         }
 
@@ -145,7 +163,7 @@ class EventRepository @Inject constructor(
             try {
                 calendarSyncManager.updateEventInCalendar(event.deviceCalendarEventId, event)
             } catch (e: Exception) {
-                android.util.Log.w("EventRepository", "Calendar sync failed on update: ${e.message}")
+                android.util.Log.w("EventRepo", "Calendar sync failed on update: ${e.message}")
             }
         }
 
@@ -157,11 +175,11 @@ class EventRepository @Inject constructor(
                     description = event.description,
                     start = "${event.dateStart}T${event.timeStart}:00+03:00",
                     end = "${event.dateEnd}T${event.timeEnd}:00+03:00",
-                    location = event.roomName,
+                    location = event.roomName ?: "",
                     externalId = event.id.toString()
                 )
             } catch (e: Exception) {
-                android.util.Log.e("EventRepository", "Yandex update failed: ${e.message}")
+                android.util.Log.e("EventRepo", "Yandex update failed: ${e.message}")
             }
         }
     }
@@ -173,7 +191,7 @@ class EventRepository @Inject constructor(
             try {
                 calendarSyncManager.deleteEventFromCalendar(event.deviceCalendarEventId)
             } catch (e: Exception) {
-                android.util.Log.w("EventRepository", "Calendar sync failed on delete: ${e.message}")
+                android.util.Log.w("EventRepo", "Calendar sync failed on delete: ${e.message}")
             }
         }
 
@@ -181,99 +199,149 @@ class EventRepository @Inject constructor(
             try {
                 yandexRepository.deleteYandexEvent(event.yandexEventId)
             } catch (e: Exception) {
-                android.util.Log.e("EventRepository", "Yandex delete failed: ${e.message}")
+                android.util.Log.e("EventRepo", "Yandex delete failed: ${e.message}")
             }
         }
     }
 
+    // ИСПРАВЛЕНО: Яндекс синхронизируется независимо от syncEnabled/selectedCalendarId
+    // syncEnabled влияет только на системный Calendar Provider
     suspend fun syncWithDeviceCalendar(): List<SyncConflictData> {
-        if (!prefs.syncEnabled) return emptyList()
-        val calendarId = prefs.selectedCalendarId ?: return emptyList()
-        val filterTags = prefs.filterTags
-        val calEvents = calendarSyncManager.readCalendarEvents(calendarId, filterTags)
         val conflicts = mutableListOf<SyncConflictData>()
         val zone = ZoneId.systemDefault()
 
-        for (calEvent in calEvents) {
-            val existing = eventDao.findByCalendarEventId(calEvent.id)
-            val startLocal = Instant.ofEpochMilli(calEvent.dtStart).atZone(zone).toLocalDateTime()
-            val endLocal = Instant.ofEpochMilli(calEvent.dtEnd).atZone(zone).toLocalDateTime()
-            val dateStr = startLocal.toLocalDate().toString()
-            val timeStartStr = startLocal.toLocalTime().toString().substring(0, 5)
-            val timeEndStr = endLocal.toLocalTime().toString().substring(0, 5)
+        android.util.Log.d("EventRepo", "=== SYNC START: syncEnabled=${prefs.syncEnabled}, calId=${prefs.selectedCalendarId}, yandex=${yandexRepository.isAuthorized()} ===")
 
-            if (existing == null) {
-                eventDao.insertEvent(EventEntity(
-                    title = calEvent.title,
-                    dateStart = dateStr,
-                    dateEnd = endLocal.toLocalDate().toString(),
-                    timeStart = timeStartStr,
-                    timeEnd = timeEndStr,
-                    roomId = 0,
-                    description = calEvent.description,
-                    syncToDeviceCalendar = true,
-                    deviceCalendarEventId = calEvent.id,
-                    fromDeviceCalendar = true,
-                    lastModifiedInCalendar = calEvent.dtStart
-                ))
+        // ── Системный Calendar Provider ──────────────────────────────────────
+        if (prefs.syncEnabled) {
+            val calendarId: Long? = prefs.selectedCalendarId
+            if (calendarId == null) {
+                android.util.Log.w("EventRepo", "syncEnabled=true но календарь не выбран!")
             } else {
-                val calNowModified = calEvent.dtStart
-                val calModified = existing.lastModifiedInCalendar ?: 0L
-                if (existing.lastModifiedInApp > calModified && calNowModified != calModified) {
-                    conflicts.add(SyncConflictData(existing.id, existing, calEvent))
-                } else if (calNowModified != calModified) {
-                    eventDao.updateEvent(existing.copy(
-                        title = calEvent.title,
-                        dateStart = dateStr,
-                        timeStart = timeStartStr,
-                        timeEnd = timeEndStr,
-                        lastModifiedInCalendar = calNowModified
-                    ))
+                val filterTags: List<String> = prefs.filterTags
+                android.util.Log.d("EventRepo", "Device calendar $calendarId, tags=$filterTags")
+                val calEvents: List<CalendarEventData> = calendarSyncManager.readCalendarEvents(calendarId, filterTags)
+                android.util.Log.d("EventRepo", "Device calendar events: ${calEvents.size}")
+
+                for (calEvent in calEvents) {
+                    val existing: EventEntity? = eventDao.findByCalendarEventId(calEvent.id)
+                    val startLocal = Instant.ofEpochMilli(calEvent.dtStart).atZone(zone).toLocalDateTime()
+                    val endLocal = Instant.ofEpochMilli(calEvent.dtEnd).atZone(zone).toLocalDateTime()
+                    val dateStr = startLocal.toLocalDate().toString()
+                    val timeStartStr = startLocal.toLocalTime().toString().substring(0, 5)
+                    val timeEndStr = endLocal.toLocalTime().toString().substring(0, 5)
+
+                    if (existing == null) {
+                        val (roomId, roomName) = resolveRoomByName(calEvent.location)
+                        eventDao.insertEvent(EventEntity(
+                            title = calEvent.title,
+                            dateStart = dateStr,
+                            dateEnd = endLocal.toLocalDate().toString(),
+                            timeStart = timeStartStr,
+                            timeEnd = timeEndStr,
+                            roomId = roomId,
+                            roomName = roomName,
+                            description = calEvent.description,
+                            syncToDeviceCalendar = true,
+                            deviceCalendarEventId = calEvent.id,
+                            fromDeviceCalendar = true,
+                            lastModifiedInCalendar = calEvent.dtStart
+                        ))
+                        android.util.Log.d("EventRepo", "Inserted from device calendar: '${calEvent.title}'")
+                    } else {
+                        val calNowModified = calEvent.dtStart
+                        val calModified = existing.lastModifiedInCalendar ?: 0L
+                        if (existing.lastModifiedInApp > calModified && calNowModified != calModified) {
+                            conflicts.add(SyncConflictData(existing.id, existing, calEvent))
+                        } else if (calNowModified != calModified) {
+                            eventDao.updateEvent(existing.copy(
+                                title = calEvent.title,
+                                dateStart = dateStr,
+                                timeStart = timeStartStr,
+                                timeEnd = timeEndStr,
+                                lastModifiedInCalendar = calNowModified
+                            ))
+                        }
+                    }
                 }
             }
         }
 
-        // Синхронизация с Яндекс Календарём
-        // getYandexEvents() возвращает List<CalendarEventData> с полями:
-        // id: Long, title: String, description: String, location: String, dtStart: Long, dtEnd: Long
+        // ── Яндекс Календарь — независимо от syncEnabled ────────────────────
         if (yandexRepository.isAuthorized()) {
             try {
-                val yandexResult = yandexRepository.getYandexEvents()
-                yandexResult.getOrNull()?.forEach { yEvent ->
-                    // ИСПРАВЛЕНО: ищем по yandexEventId (String?) == yEvent.id.toString()
-                    // yEvent.id — Long (hashCode от UID), конвертируем в String для сравнения
-                    val existingByYandex = eventDao.getAllEventsSync()
-                        .find { it.yandexEventId == yEvent.id.toString() }
+                android.util.Log.d("EventRepo", "Fetching Yandex events...")
+                val yandexResult: Result<List<CalendarEventData>> = yandexRepository.getYandexEvents()
 
-                    if (existingByYandex == null) {
-                        // ИСПРАВЛЕНО: используем dtStart/dtEnd (Long миллисекунды), а не start.dateTime
-                        val startLocal2 = Instant.ofEpochMilli(yEvent.dtStart)
-                            .atZone(zone).toLocalDateTime()
-                        val endLocal2 = Instant.ofEpochMilli(yEvent.dtEnd)
-                            .atZone(zone).toLocalDateTime()
+                yandexResult.onFailure { e: Throwable ->
+                    android.util.Log.e("EventRepo", "Yandex fetch failed: ${e.message}")
+                }
 
-                        eventDao.insertEvent(EventEntity(
-                            // ИСПРАВЛЕНО: используем title, а не summary
-                            title = yEvent.title,
-                            dateStart = startLocal2.toLocalDate().toString(),
-                            dateEnd = endLocal2.toLocalDate().toString(),
-                            timeStart = startLocal2.toLocalTime().toString().substring(0, 5),
-                            timeEnd = endLocal2.toLocalTime().toString().substring(0, 5),
-                            roomId = 0,
-                            roomName = yEvent.location,
-                            description = yEvent.description,
-                            // ИСПРАВЛЕНО: yandexEventId — String?, передаём id.toString()
-                            yandexEventId = yEvent.id.toString(),
-                            fromDeviceCalendar = false
-                        ))
+                yandexResult.onSuccess { yEvents: List<CalendarEventData> ->
+                    android.util.Log.d("EventRepo", "Yandex events: ${yEvents.size}")
+                    val allLocal: List<EventEntity> = eventDao.getAllEventsSync()
+
+                    // Импортируем из Яндекса в приложение
+                    for (yEvent in yEvents) {
+                        val yIdStr: String = yEvent.id.toString()
+                        val existing: EventEntity? = allLocal.find { it.yandexEventId == yIdStr }
+
+                        if (existing == null) {
+                            val startLocal2 = Instant.ofEpochMilli(yEvent.dtStart).atZone(zone).toLocalDateTime()
+                            val endLocal2 = Instant.ofEpochMilli(yEvent.dtEnd).atZone(zone).toLocalDateTime()
+                            val (roomId, roomName) = resolveRoomByName(yEvent.location)
+
+                            eventDao.insertEvent(EventEntity(
+                                title = yEvent.title,
+                                dateStart = startLocal2.toLocalDate().toString(),
+                                dateEnd = endLocal2.toLocalDate().toString(),
+                                timeStart = startLocal2.toLocalTime().toString().substring(0, 5),
+                                timeEnd = endLocal2.toLocalTime().toString().substring(0, 5),
+                                roomId = roomId,
+                                roomName = roomName,
+                                description = yEvent.description,
+                                yandexEventId = yIdStr,
+                                fromDeviceCalendar = false
+                            ))
+                            android.util.Log.d("EventRepo", "Inserted from Yandex: '${yEvent.title}', room='$roomName'")
+                        }
+                    }
+
+                    // Пушим в Яндекс события из приложения без yandexEventId
+                    val toPush: List<EventEntity> = allLocal.filter { e: EventEntity ->
+                        e.yandexEventId == null && !e.fromDeviceCalendar && e.title.isNotBlank()
+                    }
+                    android.util.Log.d("EventRepo", "Events to push to Yandex: ${toPush.size}")
+
+                    for (event: EventEntity in toPush) {
+                        try {
+                            val yId: String? = yandexRepository.syncBookingToYandex(
+                                summary = event.title,
+                                description = event.description,
+                                start = "${event.dateStart}T${event.timeStart}:00+03:00",
+                                end = "${event.dateEnd}T${event.timeEnd}:00+03:00",
+                                location = event.roomName ?: "",
+                                externalId = event.id.toString()
+                            ).getOrNull()
+
+                            if (yId != null) {
+                                eventDao.updateEvent(event.copy(yandexEventId = yId))
+                                android.util.Log.d("EventRepo", "Pushed to Yandex: '${event.title}'")
+                            }
+                        } catch (e: Exception) {
+                            android.util.Log.e("EventRepo", "Push failed '${event.title}': ${e.message}")
+                        }
                     }
                 }
             } catch (e: Exception) {
-                android.util.Log.e("EventRepository", "Yandex periodic sync failed", e)
+                android.util.Log.e("EventRepo", "Yandex sync block failed", e)
             }
+        } else {
+            android.util.Log.d("EventRepo", "Yandex not authorized, skipping")
         }
 
         prefs.lastSyncTime = System.currentTimeMillis()
+        android.util.Log.d("EventRepo", "=== SYNC END, conflicts=${conflicts.size} ===")
         return conflicts
     }
 }
